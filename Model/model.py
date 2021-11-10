@@ -1,14 +1,9 @@
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 # import tensorflow as tf
-from tensorflow.python.ops.rnn_cell import GRUCell
-from tensorflow.python.ops.rnn_cell import LSTMCell
-from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn as bi_rnn
 #from tensorflow.python.ops.rnn import dynamic_rnn
 # from rnn import dynamic_rnn
-from utils import *
-from Dice import dice
-
+from Utils.utils import *
 
 class Model(object):
     def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling = False):
@@ -37,42 +32,36 @@ class Model(object):
             tf.summary.histogram('mid_embeddings_var', self.mid_embeddings_var)
             self.mid_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_batch_ph)
             self.mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_his_batch_ph)
-            if self.use_negsampling:
-                self.noclk_mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.noclk_mid_batch_ph)
+            # if self.use_negsampling:
+            #     self.noclk_mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.noclk_mid_batch_ph)
 
             self.cat_embeddings_var = tf.get_variable("cat_embedding_var", [n_cat, EMBEDDING_DIM])
             tf.summary.histogram('cat_embeddings_var', self.cat_embeddings_var)
             self.cat_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_batch_ph)
             self.cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_his_batch_ph)
-            if self.use_negsampling:
-                self.noclk_cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.noclk_cat_batch_ph)
+            # if self.use_negsampling:
+            #     self.noclk_cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.noclk_cat_batch_ph)
 
         self.item_eb = tf.concat([self.mid_batch_embedded, self.cat_batch_embedded], 1)
         self.item_his_eb = tf.concat([self.mid_his_batch_embedded, self.cat_his_batch_embedded], 2)
         self.item_his_eb_sum = tf.reduce_sum(self.item_his_eb, 1)
-        if self.use_negsampling:
-            self.noclk_item_his_eb = tf.concat(
-                [self.noclk_mid_his_batch_embedded[:, :, 0, :], self.noclk_cat_his_batch_embedded[:, :, 0, :]], -1)# 0 means only using the first negative item ID. 3 item IDs are inputed in the line 24.
-            self.noclk_item_his_eb = tf.reshape(self.noclk_item_his_eb,
-                                                [-1, tf.shape(self.noclk_mid_his_batch_embedded)[1], 36])# cat embedding 18 concate item embedding 18.
 
-            self.noclk_his_eb = tf.concat([self.noclk_mid_his_batch_embedded, self.noclk_cat_his_batch_embedded], -1)
-            self.noclk_his_eb_sum_1 = tf.reduce_sum(self.noclk_his_eb, 2)
-            self.noclk_his_eb_sum = tf.reduce_sum(self.noclk_his_eb_sum_1, 1)
+        # if self.use_negsampling:
+        #     self.noclk_item_his_eb = tf.concat(
+        #         [self.noclk_mid_his_batch_embedded[:, :, 0, :], self.noclk_cat_his_batch_embedded[:, :, 0, :]], -1)# 0 means only using the first negative item ID. 3 item IDs are inputed in the line 24.
+        #     self.noclk_item_his_eb = tf.reshape(self.noclk_item_his_eb,
+        #                                         [-1, tf.shape(self.noclk_mid_his_batch_embedded)[1], 36])# cat embedding 18 concate item embedding 18.
+        #
+        #     self.noclk_his_eb = tf.concat([self.noclk_mid_his_batch_embedded, self.noclk_cat_his_batch_embedded], -1)
+        #     self.noclk_his_eb_sum_1 = tf.reduce_sum(self.noclk_his_eb, 2)
+        #     self.noclk_his_eb_sum = tf.reduce_sum(self.noclk_his_eb_sum_1, 1)
 
-    def build_fcn_net(self, inp, use_dice = False):
+    def build_fcn_net(self, inp):
         bn1 = tf.layers.batch_normalization(inputs=inp, name='bn1')
         dnn1 = tf.layers.dense(bn1, 200, activation=None, name='f1')
-        if use_dice:
-            dnn1 = dice(dnn1, name='dice_1')
-        else:
-            dnn1 = prelu(dnn1, 'prelu1')
-
+        dnn1 = tf.nn.relu(dnn1, name='relu_1')
         dnn2 = tf.layers.dense(dnn1, 80, activation=None, name='f2')
-        if use_dice:
-            dnn2 = dice(dnn2, name='dice_2')
-        else:
-            dnn2 = prelu(dnn2, 'prelu2')
+        dnn2 = tf.nn.relu(dnn2, name='relu_2')
         dnn3 = tf.layers.dense(dnn2, 2, activation=None, name='f3')
         self.y_hat = tf.nn.softmax(dnn3) + 0.00000001
 
@@ -80,8 +69,8 @@ class Model(object):
             # Cross-entropy loss and optimizer initialization
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
-            if self.use_negsampling:
-                self.loss += self.aux_loss
+            # if self.use_negsampling:
+            #     self.loss += self.aux_loss
             tf.summary.scalar('loss', self.loss)
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss)
 
@@ -180,37 +169,35 @@ class Model(object):
         saver.restore(sess, save_path=path)
         print('model restored from %s' % path)
 
-
-class Model_WideDeep(Model):
-    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling=False):
-        super(Model_WideDeep, self).__init__(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE,
-                                        ATTENTION_SIZE,
-                                        use_negsampling)
-
-        inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum], 1)
-        # Fully connected layer
-        bn1 = tf.layers.batch_normalization(inputs=inp, name='bn1')
-        dnn1 = tf.layers.dense(bn1, 200, activation=None, name='f1')
-        dnn1 = prelu(dnn1, 'p1')
-        dnn2 = tf.layers.dense(dnn1, 80, activation=None, name='f2')
-        dnn2 = prelu(dnn2, 'p2')
-        dnn3 = tf.layers.dense(dnn2, 2, activation=None, name='f3')
-        d_layer_wide = tf.concat([tf.concat([self.item_eb,self.item_his_eb_sum], axis=-1),
-                                self.item_eb * self.item_his_eb_sum], axis=-1)
-        d_layer_wide = tf.layers.dense(d_layer_wide, 2, activation=None, name='f_fm')
-        self.y_hat = tf.nn.softmax(dnn3 + d_layer_wide)
-
-        with tf.name_scope('Metrics'):
-            # Cross-entropy loss and optimizer initialization
-            self.loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
-            tf.summary.scalar('loss', self.loss)
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss)
-
-            # Accuracy metric
-            self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), tf.float32))
-            tf.summary.scalar('accuracy', self.accuracy)
-        self.merged = tf.summary.merge_all()
-
+# class Model_WideDeep(Model):
+#     def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling=False):
+#         super(Model_WideDeep, self).__init__(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE,
+#                                         ATTENTION_SIZE,
+#                                         use_negsampling)
+#
+#         inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum], 1)
+#         # Fully connected layer
+#         bn1 = tf.layers.batch_normalization(inputs=inp, name='bn1')
+#         dnn1 = tf.layers.dense(bn1, 200, activation=None, name='f1')
+#         dnn1 = prelu(dnn1, 'p1')
+#         dnn2 = tf.layers.dense(dnn1, 80, activation=None, name='f2')
+#         dnn2 = prelu(dnn2, 'p2')
+#         dnn3 = tf.layers.dense(dnn2, 2, activation=None, name='f3')
+#         d_layer_wide = tf.concat([tf.concat([self.item_eb,self.item_his_eb_sum], axis=-1),
+#                                 self.item_eb * self.item_his_eb_sum], axis=-1)
+#         d_layer_wide = tf.layers.dense(d_layer_wide, 2, activation=None, name='f_fm')
+#         self.y_hat = tf.nn.softmax(dnn3 + d_layer_wide)
+#
+#         with tf.name_scope('Metrics'):
+#             # Cross-entropy loss and optimizer initialization
+#             self.loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
+#             tf.summary.scalar('loss', self.loss)
+#             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss)
+#
+#             # Accuracy metric
+#             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), tf.float32))
+#             tf.summary.scalar('accuracy', self.accuracy)
+#         self.merged = tf.summary.merge_all()
 
 class Model_DNN(Model):
     def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling=False):
@@ -219,7 +206,8 @@ class Model_DNN(Model):
                                                           use_negsampling)
 
         inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum], 1)
-        self.build_fcn_net(inp, use_dice=False)
+        # Fully connected layer
+        self.build_fcn_net(inp)
 
 
 class Model_DIN(Model):
@@ -235,5 +223,8 @@ class Model_DIN(Model):
             tf.summary.histogram('att_fea', att_fea)
         inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum, self.item_eb * self.item_his_eb_sum, att_fea], -1)
         # Fully connected layer
-        self.build_fcn_net(inp, use_dice=True)
+        self.build_fcn_net(inp)
+
+# class Model_GIFT(Model):
+#     def __init__(self, n_):
 

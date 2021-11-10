@@ -68,7 +68,7 @@ class DataIterator:
                 cat_idx = 0
             self.meta_id_map[mid_idx] = cat_idx
 
-        f_review = open("../data1/reviews-info", "r")
+        f_review = open("Amazon/reviews-info", "r")
         self.mid_list_for_random = []
         for line in f_review:
             arr = line.strip().split("\t")
@@ -102,7 +102,7 @@ class DataIterator:
 
     def reset(self):
         if self.shuffle:
-            self.source= shuffle.main(self.source_orig, temporary=True)
+            self.source=shuffle.main(self.source_orig, temporary=True)
         else:
             self.source.seek(0)
 

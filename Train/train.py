@@ -1,5 +1,5 @@
 import numpy
-from data_iterator import DataIterator
+from Data.data_iterator import DataIterator
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 # import tensorflow as tf
@@ -105,11 +105,11 @@ def eval(sess, test_data, model, model_path):
     return test_auc, loss_sum, accuracy_sum, aux_loss_sum
 
 def train(
-        train_file = "../data/local_train_splitByUser",
-        test_file = "../data/local_test_splitByUser",
-        uid_voc = "../data/uid_voc.pkl",
-        mid_voc = "../data/mid_voc.pkl",
-        cat_voc = "../data/cat_voc.pkl",
+        train_file = "../Data/local_train_splitByUser",
+        test_file = "../Data/local_test_splitByUser",
+        uid_voc = "../Data/uid_voc.pkl",
+        mid_voc = "../Data/mid_voc.pkl",
+        cat_voc = "../Data/cat_voc.pkl",
         batch_size = 128,
         maxlen = 100,
         test_iter = 100,
@@ -126,8 +126,6 @@ def train(
         n_uid, n_mid, n_cat = train_data.get_n()
         if model_type == 'DNN':
             model = Model_DNN(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE)
-        elif model_type == 'Wide':
-            model = Model_WideDeep(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE)
         elif model_type == 'DIN':
             model = Model_DIN(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE)
         else:
@@ -142,7 +140,7 @@ def train(
 
         start_time = time.time()
         iter = 0
-        lr = 0.001
+        lr = 0.0005
         for itr in range(3):
             loss_sum = 0.0
             accuracy_sum = 0.
@@ -162,24 +160,23 @@ def train(
                     loss_sum = 0.0
                     accuracy_sum = 0.0
                     aux_loss_sum = 0.0
-                if (iter % save_iter) == 0:
-                    print('save model iter: %d' %(iter))
+                # if (iter % save_iter) == 0:
+                    # print('save model iter: %d' %(iter))
                     # model.save(sess, model_path+"--"+str(iter))
-            lr *= 0.5
 
+            # lr *= 0.5
 
 # def test(
-#         train_file = "../data/local_train_splitByUser",
-#         test_file = "../data/local_test_splitByUser",
-#         uid_voc = "../data/uid_voc.pkl",
-#         mid_voc = "../data/mid_voc.pkl",
-#         cat_voc = "../data/cat_voc.pkl",
+#         train_file = "../Data/local_train_splitByUser",
+#         test_file = "../Data/local_test_splitByUser",
+#         uid_voc = "../Data/uid_voc.pkl",
+#         mid_voc = "../Data/mid_voc.pkl",
+#         cat_voc = "../Data/cat_voc.pkl",
 #         batch_size = 128,
 #         maxlen = 100,
 #         model_type = 'DNN',
 #     seed = 2
 # ):
-#
 #     model_path = "../dnn_best_model/ckpt_noshuff" + model_type + str(seed)
 #     # gpu_options = tf.GPUOptions(allow_growth=True)
 #     with tf.Session() as sess:
@@ -209,7 +206,6 @@ if __name__ == '__main__':
     random.seed(SEED)
     train(model_type='DIN', seed=SEED)
 
-    #
     # if sys.argv[1] == 'train':
     #     train(model_type=sys.argv[2], seed=SEED)
     # elif sys.argv[1] == 'test':

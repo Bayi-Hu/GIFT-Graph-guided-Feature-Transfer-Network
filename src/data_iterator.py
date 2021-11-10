@@ -13,10 +13,12 @@ def unicode_to_utf8(d):
 def load_dict(filename):
     try:
         with open(filename, 'rb') as f:
-            return unicode_to_utf8(json.load(f))
+            # return unicode_to_utf8(json.load(f))
+            return json.load(f)
     except:
         with open(filename, 'rb') as f:
-            return unicode_to_utf8(pkl.load(f))
+            # return unicode_to_utf8(pkl.load(f))
+            return pkl.load(f)
 
 
 def fopen(filename, mode='r'):
@@ -104,7 +106,7 @@ class DataIterator:
         else:
             self.source.seek(0)
 
-    def next(self):
+    def __next__(self):
         if self.end_of_data:
             self.end_of_data = False
             self.reset()
@@ -139,7 +141,6 @@ class DataIterator:
 
             # actual work here
             while True:
-
                 # read from source file and map to word index
                 try:
                     ss = self.source_buffer.pop()

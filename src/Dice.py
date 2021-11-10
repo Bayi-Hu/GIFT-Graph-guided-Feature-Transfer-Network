@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 def dice(_x, axis=-1, epsilon=0.000000001, name=''):
   with tf.variable_scope(name, reuse=tf.AUTO_REUSE):

@@ -9,6 +9,7 @@ from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn as bi_rnn
 from utils import *
 from Dice import dice
 
+
 class Model(object):
     def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling = False):
         with tf.name_scope('Inputs'):

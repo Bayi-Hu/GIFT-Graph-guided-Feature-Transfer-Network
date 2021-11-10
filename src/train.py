@@ -156,7 +156,7 @@ def train(
                 iter += 1
                 sys.stdout.flush()
                 if (iter % test_iter) == 0:
-                    print('iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- tran_aux_loss: %.4f' % \
+                    print('iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f' % \
                                           (iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter))
                     # print('test_auc: %.4f ----test_loss: %.4f ---- test_accuracy: %.4f ---- test_aux_loss: %.4f' % eval(sess, test_data, model, best_model_path))
                     loss_sum = 0.0
@@ -166,6 +166,7 @@ def train(
                     print('save model iter: %d' %(iter))
                     # model.save(sess, model_path+"--"+str(iter))
             lr *= 0.5
+
 
 # def test(
 #         train_file = "../data/local_train_splitByUser",

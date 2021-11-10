@@ -1,13 +1,13 @@
 import numpy
-from Data.data_iterator import DataIterator
+from FeatGeneration.data_iterator import DataIterator
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 # import tensorflow as tf
-from model import *
+from Model import *
 import time
 import random
 import sys
-from utils import *
+from Utils import *
 
 EMBEDDING_DIM = 18
 HIDDEN_SIZE = 18 * 2
@@ -105,11 +105,11 @@ def eval(sess, test_data, model, model_path):
     return test_auc, loss_sum, accuracy_sum, aux_loss_sum
 
 def train(
-        train_file = "../Data/local_train_splitByUser",
-        test_file = "../Data/local_test_splitByUser",
-        uid_voc = "../Data/uid_voc.pkl",
-        mid_voc = "../Data/mid_voc.pkl",
-        cat_voc = "../Data/cat_voc.pkl",
+        train_file = "../FeatGeneration/local_train_splitByUser",
+        test_file = "../FeatGeneration/local_test_splitByUser",
+        uid_voc = "../FeatGeneration/uid_voc.pkl",
+        mid_voc = "../FeatGeneration/mid_voc.pkl",
+        cat_voc = "../FeatGeneration/cat_voc.pkl",
         batch_size = 128,
         maxlen = 100,
         test_iter = 100,
@@ -167,11 +167,11 @@ def train(
             # lr *= 0.5
 
 # def test(
-#         train_file = "../Data/local_train_splitByUser",
-#         test_file = "../Data/local_test_splitByUser",
-#         uid_voc = "../Data/uid_voc.pkl",
-#         mid_voc = "../Data/mid_voc.pkl",
-#         cat_voc = "../Data/cat_voc.pkl",
+#         train_file = "../FeatGeneration/local_train_splitByUser",
+#         test_file = "../FeatGeneration/local_test_splitByUser",
+#         uid_voc = "../FeatGeneration/uid_voc.pkl",
+#         mid_voc = "../FeatGeneration/mid_voc.pkl",
+#         cat_voc = "../FeatGeneration/cat_voc.pkl",
 #         batch_size = 128,
 #         maxlen = 100,
 #         model_type = 'DNN',

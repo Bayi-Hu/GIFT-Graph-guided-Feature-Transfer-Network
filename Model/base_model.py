@@ -1,6 +1,8 @@
-#-*- coding:utf-8 -*-
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
+# import tensorflow as tf
+#from tensorflow.python.ops.rnn import dynamic_rnn
+# from rnn import dynamic_rnn
 from Utils.utils import *
 
 class Model(object):
@@ -43,6 +45,16 @@ class Model(object):
         self.item_eb = tf.concat([self.mid_batch_embedded, self.cat_batch_embedded], 1)
         self.item_his_eb = tf.concat([self.mid_his_batch_embedded, self.cat_his_batch_embedded], 2)
         self.item_his_eb_sum = tf.reduce_sum(self.item_his_eb, 1)
+
+        # if self.use_negsampling:
+        #     self.noclk_item_his_eb = tf.concat(
+        #         [self.noclk_mid_his_batch_embedded[:, :, 0, :], self.noclk_cat_his_batch_embedded[:, :, 0, :]], -1)# 0 means only using the first negative item ID. 3 item IDs are inputed in the line 24.
+        #     self.noclk_item_his_eb = tf.reshape(self.noclk_item_his_eb,
+        #                                         [-1, tf.shape(self.noclk_mid_his_batch_embedded)[1], 36])# cat embedding 18 concate item embedding 18.
+        #
+        #     self.noclk_his_eb = tf.concat([self.noclk_mid_his_batch_embedded, self.noclk_cat_his_batch_embedded], -1)
+        #     self.noclk_his_eb_sum_1 = tf.reduce_sum(self.noclk_his_eb, 2)
+        #     self.noclk_his_eb_sum = tf.reduce_sum(self.noclk_his_eb_sum_1, 1)
 
     def build_fcn_net(self, inp):
         bn1 = tf.layers.batch_normalization(inputs=inp, name='bn1')
@@ -89,4 +101,75 @@ class Model(object):
         y_hat = tf.nn.softmax(dnn3) + 0.00000001
         return y_hat
 
+
+    def train(self, sess, inps):
+        if self.use_negsampling:
+            loss, accuracy, aux_loss, _ = sess.run([self.loss, self.accuracy, self.aux_loss, self.optimizer], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cat_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cat_his_batch_ph: inps[4],
+                self.mask: inps[5],
+                self.target_ph: inps[6],
+                self.seq_len_ph: inps[7],
+                self.lr: inps[8],
+                self.noclk_mid_batch_ph: inps[9],
+                self.noclk_cat_batch_ph: inps[10],
+            })
+            return loss, accuracy, aux_loss
+        else:
+            loss, accuracy, _ = sess.run([self.loss, self.accuracy, self.optimizer], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cat_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cat_his_batch_ph: inps[4],
+                self.mask: inps[5],
+                self.target_ph: inps[6],
+                self.seq_len_ph: inps[7],
+                self.lr: inps[8],
+            })
+            return loss, accuracy, 0
+
+    def calculate(self, sess, inps):
+        if self.use_negsampling:
+            probs, loss, accuracy, aux_loss = sess.run([self.y_hat, self.loss, self.accuracy, self.aux_loss], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cat_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cat_his_batch_ph: inps[4],
+                self.mask: inps[5],
+                self.target_ph: inps[6],
+                self.seq_len_ph: inps[7],
+                self.noclk_mid_batch_ph: inps[8],
+                self.noclk_cat_batch_ph: inps[9],
+            })
+            return probs, loss, accuracy, aux_loss
+        else:
+            probs, loss, accuracy = sess.run([self.y_hat, self.loss, self.accuracy], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cat_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cat_his_batch_ph: inps[4],
+                self.mask: inps[5],
+                self.target_ph: inps[6],
+                self.seq_len_ph: inps[7]
+            })
+            return probs, loss, accuracy, 0
+
+    def save(self, sess, path):
+        saver = tf.train.Saver()
+        saver.save(sess, save_path=path)
+
+    def restore(self, sess, path):
+        saver = tf.train.Saver()
+        saver.restore(sess, save_path=path)
+        print('model restored from %s' % path)
+
+
+# class Model_GIFT(Model):
+#     def __init__(self, n_):
 

@@ -1,0 +1,20 @@
+{
+  "model": "modelSeqTargetAtten",
+  "dataset" : "Amazon",
+  "feature": {
+    "user_id": {
+      "type": "string",
+      "bucket_size" : 5000
+    },
+    "item_id": {
+      "type": "string",
+      "bucket_size" : 5000
+    } ,
+    ""
+  },
+  "sequnece_feature": {
+    ""
+    ""
+  }
+
+}

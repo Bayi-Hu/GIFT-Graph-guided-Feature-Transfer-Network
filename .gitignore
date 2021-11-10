@@ -1,5 +1,5 @@
-/Data/Amazon/*
-/Data/MovieLens-1M/*
-/Data/notebook/*
+/FeatGeneration/Amazon/*
+/FeatGeneration/MovieLens-1M/*
+/FeatGeneration/notebook/*
 /.DS_Store
 /.idea/*

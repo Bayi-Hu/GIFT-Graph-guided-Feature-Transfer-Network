@@ -7,7 +7,7 @@ class Model(object):
 
     def __init__(self, tensor_dict):
 
-        self.length = tensor_dict["length"]
+        # self.length = tensor_dict["length"]
         self.label = tensor_dict["label"]
 
         self.user_embedding = tensor_dict["user_embedding"]
@@ -52,5 +52,3 @@ class Model(object):
 
         self.merged = tf.summary.merge_all()
         return
-
-

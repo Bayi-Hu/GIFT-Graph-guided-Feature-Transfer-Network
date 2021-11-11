@@ -12,7 +12,9 @@ class FeatGenerator(object):
             "d_iid": 32,
             "n_cid": 1000,
             "d_cid": 32,
-            "max_length": 100
+            "max_length": 100,
+            "batch_size": 128,
+            "epoch":1
         }
 
     def parse_split(self, line):
@@ -34,8 +36,10 @@ class FeatGenerator(object):
         split the sequence and convert to dense tensor
         """
         split_sequence = tf.string_split(sequence, delimiter="")
-        split_sequence = tf.sparse_to_dense(sparse_indices=split_sequence.indices, output_shape=[ 128, self.feat_config["max_length"]],
-                           sparse_values=split_sequence.values, default_value="0")
+        split_sequence = tf.sparse_to_dense(sparse_indices=split_sequence.indices,
+                                            output_shape=[self.feat_config["batch_size"],
+                                                          self.feat_config["max_length"]],
+                                            sparse_values=split_sequence.values, default_value="0")
 
         return split_sequence
 
@@ -48,7 +52,7 @@ class FeatGenerator(object):
         """
         dataset = tf.data.TextLineDataset(self.input_file)
         dataset = dataset.map(self.parse_split, num_parallel_calls=2)
-        dataset = dataset.shuffle(3).repeat(1).batch(128)
+        dataset = dataset.shuffle(3).repeat(self.feat_config["epoch"]).batch(self.feat_config["batch_size"])
         iterator = dataset.make_one_shot_iterator()
 
         label, user_id, item_id, category, seq_item_id, seq_category = iterator.get_next()
@@ -58,7 +62,7 @@ class FeatGenerator(object):
         seq_category = self.parse_sequence(seq_category)
 
         features = {}
-        features["label"] = tf.cast(label, tf.float32)
+        features["label"] = tf.one_hot(tf.string_to_number(label, out_type=tf.int32), depth=2)
         features["user_id"] = user_id
         features["item_id"] = item_id
         features["category"] = category

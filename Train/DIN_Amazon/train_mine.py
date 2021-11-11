@@ -22,14 +22,16 @@ if __name__ == '__main__':
     model.build()
 
     with tf.Session() as sess:
-
         sess.run(tf.global_variables_initializer())
-        for i in range(100):
+        iter = 0
+        while True:
+        # for i in range(100):
             try:
                 _, loss, acc = sess.run([model.optimizer, model.loss, model.accuracy])
-                print("loss=", loss)
-                print("acc=", acc)
-            except:
+                print("iter=%d, loss=%f, acc=%f" %(iter, loss, acc))
+                iter += 1
+            except Exception as e:
+                print(e)
                 break
 
 

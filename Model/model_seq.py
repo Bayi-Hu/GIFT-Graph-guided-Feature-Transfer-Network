@@ -4,13 +4,16 @@ tf.disable_v2_behavior()
 from model import Model
 
 class ModelSeq(Model):
-    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling=False):
-        super(ModelSeq, self).__init__(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE,
-                                                          ATTENTION_SIZE,
-                                                          use_negsampling)
+    def __init__(self, tensor_dict):
+        super(ModelSeq, self).__init__(tensor_dict)
 
-        # Sequence_Layer
+        # notice, it should be mask with the length mask ..
+        self.seq_item_embedding_mean = tf.reduce_mean(self.opt_seq_embedding, axis=1)
 
-        inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum], 1)
-        # Fully connected layer
+    def build(self):
+        """
+        override the build function
+        """
+        inp = tf.concate([self.item_embedding, self.user_embedding, self.seq_item_embedding_mean], axis=1)
         self.build_fcn_net(inp)
+        self.loss_op()

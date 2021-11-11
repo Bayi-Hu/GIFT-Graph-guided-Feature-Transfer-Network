@@ -1,15 +1,29 @@
+#-*- coding:utf-8 -*-
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+from model_seq_target_atten import ModelSeqTargetAtten
 
-class Model_DIN(Model):
-    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, use_negsampling=False):
-        super(Model_DIN, self).__init__(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE,
-                                           ATTENTION_SIZE,
-                                           use_negsampling)
+class ModelSeqTargetAttenGIFT(ModelSeqTargetAtten):
+    def __init__(self, tensor_dict):
+        super(ModelSeqTargetAttenGIFT, self).__init__(tensor_dict)
 
-        # Attention layer
-        with tf.name_scope('Attention_layer'):
-            attention_output = din_attention(self.item_eb, self.item_his_eb, ATTENTION_SIZE, self.mask)
-            att_fea = tf.reduce_sum(attention_output, 1)
-            tf.summary.histogram('att_fea', att_fea)
-        inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum, self.item_eb * self.item_his_eb_sum, att_fea], -1)
-        # Fully connected layer
+
+    def build(self):
+        """
+        override the build function
+        """
+        self.attended_embedding = self.target_attention_layer(query=self.item_embedding,
+                                                              key=self.opt_seq_embedding,
+                                                              value=self.opt_seq_embedding,
+                                                              length=self.length)
+
+        # gift part
+
+
+
+
+        inp = tf.concate([self.item_embedding, self.user_embedding, self.seq_item_embedding_mean, self.attended_embedding], axis=1)
         self.build_fcn_net(inp)
+        self.loss_op()
+
+

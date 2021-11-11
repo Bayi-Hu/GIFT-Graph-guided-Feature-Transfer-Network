@@ -28,7 +28,10 @@ if __name__ == '__main__':
         # for i in range(100):
             try:
                 _, loss, acc = sess.run([model.optimizer, model.loss, model.accuracy])
-                print("iter=%d, loss=%f, acc=%f" %(iter, loss, acc))
+
+                if iter % 100 == 0:
+                    print("iter=%d, loss=%f, acc=%f" %(iter, loss, acc))
+
                 iter += 1
             except Exception as e:
                 print(e)

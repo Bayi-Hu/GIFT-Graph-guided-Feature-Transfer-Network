@@ -14,7 +14,7 @@ class FeatGenerator(object):
             "d_cid": 32,
             "max_length": 100,
             "batch_size": 128,
-            "epoch":1
+            "epoch": 3
         }
 
     def parse_split(self, line):

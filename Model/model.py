@@ -19,7 +19,7 @@ class Model(object):
         self.model_config = {
             "hidden1": 64,
             "hidden2": 32,
-            "learning_rate": 0.005
+            "learning_rate": 0.001
         }
 
     def build(self):
@@ -31,10 +31,13 @@ class Model(object):
         self.loss_op()
 
     def build_fcn_net(self, inp):
-        dnn1 = tf.layers.dense(inp, self.model_config["hidden1"], activation=tf.nn.relu, name='f1')
-        dnn2 = tf.layers.dense(dnn1, self.model_config["hidden2"], activation=tf.nn.relu, name='f2')
-        dnn3 = tf.layers.dense(dnn2, 2, activation=None, name='f3')
+        with tf.name_scope("Fully_connected_layer"):
+            dnn1 = tf.layers.dense(inp, self.model_config["hidden1"], activation=tf.nn.relu, name='f1')
+            dnn2 = tf.layers.dense(dnn1, self.model_config["hidden2"], activation=tf.nn.relu, name='f2')
+            dnn3 = tf.layers.dense(dnn2, 2, activation=None, name='f3')
+
         self.y_hat = tf.nn.softmax(dnn3) + 0.00000001
+
         return
 
     def loss_op(self):

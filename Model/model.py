@@ -26,7 +26,7 @@ class Model(object):
         """
         build the architecture for the base DNN model.
         """
-        inp = tf.concate([self.item_embedding, self.user_embedding], axis=1)
+        inp = tf.concat([self.item_embedding, self.user_embedding], axis=1)
         self.build_fcn_net(inp)
         self.loss_op()
 

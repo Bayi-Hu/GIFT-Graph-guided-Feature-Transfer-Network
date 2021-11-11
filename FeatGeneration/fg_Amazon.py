@@ -55,9 +55,10 @@ class FeatGenerator(object):
             # , length = iterator.get_next()
 
         seq_item_id = self.parse_sequence(seq_item_id)
+        seq_category = self.parse_sequence(seq_category)
 
         features = {}
-        features["label"] = label
+        features["label"] = tf.cast(label, tf.float32)
         features["user_id"] = user_id
         features["item_id"] = item_id
         features["category"] = category
@@ -103,7 +104,7 @@ class TensorGenerator(object):
                                                                                      feat_config["n_iid"]))
 
             seq_cat_embedding = tf.nn.embedding_lookup(cat_lookup_table,
-                                                       tf.string_to_hash_bucket_fast(features["category"],
+                                                       tf.string_to_hash_bucket_fast(features["seq_category"],
                                                                                      feat_config["n_cid"]))
 
             # concatenate the tensors
@@ -113,7 +114,5 @@ class TensorGenerator(object):
             tensor_dict["opt_seq_embedding"] = tf.concat([seq_iid_embedding, seq_cat_embedding], 2)
             # tensor_dict["length"] = features["length"]
             tensor_dict["label"] = features["label"]
-
-
 
         return tensor_dict

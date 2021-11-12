@@ -6,11 +6,19 @@ import gzip
 import shuffle
 
 if __name__ == '__main__':
+
     test_file = "./Amazon/local_test_splitByUser"
+    # train_file = "./Amazon/local_train_splitByUser"
     test_file_new = "./Amazon/local_test_splitByUser_new"
+    # train_file_new = "./Amazon/local_train_splitByUser_new"
+
+    # f_read = open(train_file, "r")
+    # f_write = open(train_file_new, "w")
 
     f_read = open(test_file, "r")
     f_write = open(test_file_new, "w")
+
+    maxlen = 100
 
     for line in f_read:
         arr = line.strip().split("\t")
@@ -25,10 +33,13 @@ if __name__ == '__main__':
         length_category = len(seq_category)
         assert length_iid == length_category
 
-        arr_new = "\t".join([arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], str(length_iid)]) + "\n"
+        if length_iid >= 100:
+            seq_item_id = seq_item_id[:100]
+            seq_category = seq_category[:100]
+            length_iid = 100
 
+        arr_new = "\t".join([label, user_id, item_id, category, "".join(seq_item_id), "".join(seq_category), str(length_iid)]) + "\n"
         f_write.writelines(arr_new)
-
 
 def unicode_to_utf8(d):
     return dict((key.encode("UTF-8"), value) for (key,value) in d.items())

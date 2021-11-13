@@ -26,10 +26,9 @@ class FeatGenerator(object):
         category = values[3]
         iid_sequence = values[4]
         cat_sequence = values[5]
-        # length = values[6]
-        # length = tf.string_split([iid_sequence], delimiter="")
-        return label, user_id, item_id, category, iid_sequence, cat_sequence
-            # , length
+        length = values[6]
+
+        return label, user_id, item_id, category, iid_sequence, cat_sequence, length
 
     def parse_sequence(self, sequence):
         """
@@ -55,8 +54,7 @@ class FeatGenerator(object):
         dataset = dataset.shuffle(3).repeat(self.feat_config["epoch"]).batch(self.feat_config["batch_size"])
         iterator = dataset.make_one_shot_iterator()
 
-        label, user_id, item_id, category, seq_item_id, seq_category = iterator.get_next()
-            # , length = iterator.get_next()
+        label, user_id, item_id, category, seq_item_id, seq_category, length = iterator.get_next()
 
         seq_item_id = self.parse_sequence(seq_item_id)
         seq_category = self.parse_sequence(seq_category)
@@ -68,7 +66,7 @@ class FeatGenerator(object):
         features["category"] = category
         features["seq_item_id"] = seq_item_id
         features["seq_category"] = seq_category
-        # features["length"] = length
+        features["length"] = tf.string_to_number(length, out_type=tf.int32)
 
         return features
 
@@ -116,7 +114,7 @@ class TensorGenerator(object):
             tensor_dict["user_embedding"] = uid_embedding
             tensor_dict["item_embedding"] = tf.concat([iid_embedding, cat_embedding], 1)
             tensor_dict["opt_seq_embedding"] = tf.concat([seq_iid_embedding, seq_cat_embedding], 2)
-            # tensor_dict["length"] = features["length"]
+            tensor_dict["length"] = features["length"]
             tensor_dict["label"] = features["label"]
 
         return tensor_dict

@@ -6,8 +6,8 @@ from Model.model import Model
 
 if __name__ == '__main__':
 
-    train_file = "../../FeatGeneration/Amazon/local_train_splitByUser"
-    test_file = "../../FeatGeneration/Amazon/local_test_splitByUser"
+    train_file = "../../FeatGeneration/Amazon/local_train_splitByUser_new"
+    test_file = "../../FeatGeneration/Amazon/local_test_splitByUser_new"
 
     train_fg = FeatGenerator(train_file)
     train_features = train_fg.feature_generation()

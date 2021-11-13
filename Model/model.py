@@ -5,9 +5,9 @@ from Utils.utils import *
 
 class Model(object):
 
-    def __init__(self, tensor_dict):
+    def __init__(self, tensor_dict, train_config):
 
-        # self.length = tensor_dict["length"]
+        self.length = tensor_dict["length"]
         self.label = tensor_dict["label"]
 
         self.user_embedding = tensor_dict["user_embedding"]
@@ -21,6 +21,8 @@ class Model(object):
             "hidden2": 32,
             "learning_rate": 0.001
         }
+        self.train_config = train_config
+        # is_training, dropout_rate
 
     def build(self):
         """

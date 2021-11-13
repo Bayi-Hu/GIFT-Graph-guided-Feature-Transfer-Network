@@ -2,7 +2,7 @@
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from FeatGeneration.fg_Amazon import FeatGenerator, TensorGenerator
-from Model.model_seq import ModelSeq
+from Model.model_seq_target_atten import ModelSeqTargetAtten
 
 if __name__ == '__main__':
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # test_fg = FeatGenerator(test_file)
     # test_features = test_fg.feature_generation()
     # test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
-    model = ModelSeq(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
+    model = ModelSeqTargetAtten(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
     model.build()
 
     with tf.Session() as sess:

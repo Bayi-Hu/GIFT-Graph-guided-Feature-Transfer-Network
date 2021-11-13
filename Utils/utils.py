@@ -4,9 +4,9 @@ tf.disable_v2_behavior()
 
 def res_layer(inp, dim, name):
 
-    with tf.name_scope("Fully_connected_layer_" + name):
-        dnn1 = tf.layers.dense(inp, dim, activation=tf.nn.relu, name="f1")
-        dnn2 = tf.layers.dense(dnn1, dim, activation=None, name="f2")
+    with tf.variable_scope("Res_layer_" + name):
+        dnn1 = tf.layers.dense(inp, dim, activation=tf.nn.relu, name="res1")
+        dnn2 = tf.layers.dense(dnn1, dim, activation=None, name="res2")
 
     return dnn1 + dnn2
 
@@ -63,7 +63,7 @@ def multihead_attention(queries,
         key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(queries)[1], 1])  # (h*N, T_q, T_k)
 
         paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
-        outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs)  # (h*N, T_q, T_k)
+        outputs = tf.where(tf.logical_not(key_masks), paddings, outputs)  # (h*N, T_q, T_k)
 
         # Activation
         outputs = tf.nn.softmax(outputs)  # (h*N, T_q, T_k)

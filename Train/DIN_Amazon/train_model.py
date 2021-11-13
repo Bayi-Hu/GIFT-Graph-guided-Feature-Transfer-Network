@@ -17,8 +17,7 @@ if __name__ == '__main__':
     # test_fg = FeatGenerator(test_file)
     # test_features = test_fg.feature_generation()
     # test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
-
-    model = Model(train_tensor_dict)
+    model = Model(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
     model.build()
 
     with tf.Session() as sess:

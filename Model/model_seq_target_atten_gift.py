@@ -1,11 +1,11 @@
 #-*- coding:utf-8 -*-
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from model_seq_target_atten import ModelSeqTargetAtten
+from Model.model_seq_target_atten import ModelSeqTargetAtten
 
 class ModelSeqTargetAttenGIFT(ModelSeqTargetAtten):
-    def __init__(self, tensor_dict):
-        super(ModelSeqTargetAttenGIFT, self).__init__(tensor_dict)
+    def __init__(self, tensor_dict, train_config):
+        super(ModelSeqTargetAttenGIFT, self).__init__(tensor_dict, train_config)
 
 
     def build(self):
@@ -22,7 +22,7 @@ class ModelSeqTargetAttenGIFT(ModelSeqTargetAtten):
 
 
 
-        inp = tf.concate([self.item_embedding, self.user_embedding, self.seq_item_embedding_mean, self.attended_embedding], axis=1)
+        inp = tf.concat([self.item_embedding, self.user_embedding, self.seq_item_embedding_mean, self.attended_embedding], axis=1)
         self.build_fcn_net(inp)
         self.loss_op()
 

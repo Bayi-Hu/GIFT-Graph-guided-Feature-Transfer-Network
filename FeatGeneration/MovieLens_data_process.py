@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import pandas as pd
 import collections
-import torch
+import numpy as np
 import re
 
 def load_list(fname):
@@ -17,6 +17,12 @@ input_dir = 'MovieLens-1M/'
 
 # read logs
 ui_data = pd.read_csv(input_dir+'ratings.txt', names=['user', 'item', 'rating', 'timestamp'],sep="::", engine='python')
+
+ui_data.loc[ui_data[ui_data.rating < 4].index, 'label'] = "0"
+ui_data.loc[ui_data[ui_data.rating >= 4].index, 'label'] = "1"
+
+ui_data = ui_data.astype("string")
+
 print(len(ui_data))
 
 # read item/user feature
@@ -172,42 +178,58 @@ print(len(a_movies), len(d_movies))
 
 # TODO: 处理 ui_data, user_sequence
 # postive sample
-pos_ui_data = ui_data[ui_data.rating>=4].copy()
+pos_ui_data = ui_data[ui_data.label=="1"].copy()
+
+pos_ui_item_feat = pd.merge(left=pos_ui_data[["user", "item", "timestamp"]],
+                            right=item_feat_df, on=["item"], how="left", sort=False)
+
+
 # confine the timestamp of item in sequence less than that of target item
-X = pd.merge(left=ui_data, right=pos_ui_data, how='left', on=["user"], sort=False)
+X = pd.merge(left=ui_data[["user", "item", "timestamp", "label"]], right=pos_ui_item_feat, how='left', on=["user"], sort=False)
 X = X[X.timestamp_x > X.timestamp_y]
 
 # group by according to user and timestamp_x and sort the sequence based on timestamp_y
 
 def udf(df):
-
-    def takeSecond(elem):
-        return elem[1]
+    def takeFirst(elem):
+        return elem[0]
 
     # output = []
-    iid_sequence = []
-    X = list(zip(df.item_y, df.timestamp_y))
-    X.sort(key=takeSecond, reverse=True)
+    item_seq = []
+    rating_seq = []
+    genre_seq = []
+    director_seq = []
+    actor_seq = []
+
+    X = list(zip(df.timestamp_y, df.item_y, df.rating, df.genre, df.director, df.actor))
+    X.sort(key=takeFirst, reverse=True)
     length = 0
-    for x in X: # set max length to 100
-        iid_sequence.append(str(x[0]))
+    for x in X:  # set max length to 100
+        item_seq.append(str(x[1]))
+        rating_seq.append(str(x[2]))
+        genre_seq.append(str(x[3]))
+        director_seq.append(str(x[4]))
+        actor_seq.append(str(x[5]))
+
         length += 1
-        if length>= 100:
+        if length >= 100:
             break
 
-    data = pd.DataFrame({
-        "user": [str(df.user.iloc[0])],
-        "item": [str(df.item_x.iloc[0])],
-        "rating": [str(df.rating_x.iloc[0])],
-        "time": [str(df.timestamp_x.iloc[0])],
-        "length": [str(length)],
-        "sequence": [",".join(iid_sequence)]
-    })
+    return np.array([[df.iloc[0]["user"], df.iloc[0]["item_x"], df.iloc[0]["timestamp_x"], df.iloc[0]["label"],
+                      str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq),
+                      ",".join(director_seq), ",".join(actor_seq)]])
 
-    return data
 
-ui_data_sample = X.groupby(["user", "item_x", "timestamp_x", "rating_x"]).apply(udf).values
-ui_data_new = pd.DataFrame(ui_data_sample.values, columns=["user", "item", "rating", "time", "length", "sequence"])
+
+X_ = X.groupby(["user", "item_x", "timestamp_x", "rating_x"]).apply(udf)
+ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
+
+print("pause")
+
+
+
+
+
 
 # pd.merge(left=ui_data_new, right= , )
 

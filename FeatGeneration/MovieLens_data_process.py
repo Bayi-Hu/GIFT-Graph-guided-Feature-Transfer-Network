@@ -220,8 +220,7 @@ def udf(df):
                       ",".join(director_seq), ",".join(actor_seq)]])
 
 
-
-X_ = X.groupby(["user", "item_x", "timestamp_x", "rating_x"]).apply(udf)
+X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
 ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
 
 print("pause")

@@ -1,7 +1,6 @@
 /FeatGeneration/Amazon/*
 #/FeatGeneration/MovieLens-1M/*
 /FeatGeneration/MovieLens-1M/sample_base.csv
-/FeatGeneration/notebook/*
 /.DS_Store
 /.idea/*
 /FeatGeneration/.DS_Store

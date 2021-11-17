@@ -128,6 +128,107 @@ print(len(a_movies), len(d_movies))
 
 print("pause")
 
+def item_suffix(x):
+    return "i_"+x
 
-g = igraph.Graph()
-m_vertex =
+def actor_suffix(x):
+    return "a_"+x
+
+def director_suffix(x):
+    return "d_"+x
+
+i_vertices = list(map(item_suffix, item_data.item.values.astype(str)))
+a_vertices = list(map(actor_suffix, np.array(range(len(actor_list))).astype(str)))
+d_vertices = list(map(director_suffix, np.array(range(len(director_list))).astype(str)))
+
+# add edges
+ia_edges = []
+for iid, aids in m_actors.items():
+    for aid in aids:
+        ia_edges.append(("i_"+iid, "a_"+aid))
+
+id_edges = []
+for iid, dids in m_directors.items():
+    for did in dids:
+        id_edges.append(("i_"+iid, "d_"+did))
+
+
+g_ia = igraph.Graph()
+g_ia.add_vertices(i_vertices)
+g_ia.add_vertices(a_vertices)
+g_ia.add_edges(ia_edges)
+
+print("pause")
+
+idx2string_ia = dict(zip(range(len(g_ia.vs["name"])), g_ia.vs["name"]))
+string2idx_ia = dict(zip(g_ia.vs["name"], range(len(g_ia.vs["name"]))))
+MAX_LENGTH_IA = 30
+
+def mapGid2Iid_ia(x):
+    # x is a list of lists
+    return idx2string_ia[x]
+
+for iid in i_vertices:
+
+    gid = string2idx_ia[iid] # use for reduce itself
+    g_aids = g_ia.neighbors(vertex = iid)
+    g_iids = g_ia.neighborhood(vertices=g_aids)
+    g_iids = np.unique(np.concatenate(g_iids, axis=0))
+    g_iids = list(np.random.permutation(g_iids))
+    g_iids.remove(gid)
+    iids = list(map(mapGid2Iid_ia, g_iids))
+    print(len(iids))
+
+    if len(iids)> MAX_LENGTH_IA:
+        iids = iids[:MAX_LENGTH_IA]
+        num = MAX_LENGTH_IA
+    else:
+        num = len(iids)
+
+    # 将特征进行组合, 注意需要将sequence特征拆开
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+g_id = igraph.Graph()
+g_id.add_vertices(i_vertices)
+g_id.add_vertices(d_vertices)
+g_id.add_edges(id_edges)
+
+idx2string_id = dict(zip(range(len(g_ia.vs["name"])), g_ia.vs["name"]))
+string2idx_id = dict(zip(g_ia.vs["name"], range(len(g_ia.vs["name"]))))
+# MAX_LENGTH_ID = 30
+
+def mapGid2Iid_id(x):
+    # x is a list of lists
+    return idx2string_ia[x]
+
+for iid in i_vertices:
+
+    gid = string2idx_id[iid] # use for reduce itself
+    g_dids = g_id.neighbors(vertex = iid)
+    g_iids = g_id.neighborhood(vertices=g_dids)
+    g_iids = np.unique(np.concatenate(g_iids, axis=0))
+    g_iids = list(np.random.permutation(g_iids))
+    g_iids.remove(gid)
+    iids = list(map(mapGid2Iid_id, g_iids))
+    print(len(iids))
+
+    # if len(iids)> MAX_LENGTH_IA:
+    #     iids = iids[:MAX_LENGTH_IA]
+    #     num = MAX_LENGTH_IA
+    # else:
+    #     num = len(iids)
+
+    # 将特征进行组合

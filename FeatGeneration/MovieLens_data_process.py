@@ -21,7 +21,7 @@ ui_data = pd.read_csv(input_dir+'ratings.txt', names=['user', 'item', 'rating', 
 ui_data.loc[ui_data[ui_data.rating < 4].index, 'label'] = "0"
 ui_data.loc[ui_data[ui_data.rating >= 4].index, 'label'] = "1"
 
-ui_data = ui_data.astype("string")
+ui_data = ui_data.astype("str")
 
 print(len(ui_data))
 
@@ -60,7 +60,6 @@ def user_converting(row, gender_list, age_list, occupation_list, zipcode_list):
 
 
 # user feature -----------------------------------------------------
-user_feat_dict = {}
 user_id_list = []
 gender_id_list = []
 age_id_list = []
@@ -70,9 +69,6 @@ zip_id_list = []
 for idx, row in user_data.iterrows():
 
     user_idx, gender_idx, age_idx, occupation_idx, zip_idx = user_converting(row, gender_list, age_list, occupation_list, zipcode_list)
-    user_feat = "\t".join([user_idx, gender_idx, age_idx, occupation_idx, zip_idx])
-
-    user_feat_dict[str(row["user"])] = user_feat
 
     # for generating the user_feat_df
     user_id_list.append(user_idx)
@@ -119,7 +115,6 @@ def item_converting(row, rate_list, genre_list, director_list, actor_list):
 # -----------------------------------------------------
 # item feature & relationship: movie-actor; movie-director
 
-item_feat_dict = {}
 m_directors = {}
 m_actors = {}
 
@@ -139,9 +134,6 @@ for idx, row in item_data.iterrows():
     directors = "".join(director_idx)
     actors = "".join(actor_idx)
 
-    item_feat = "\t".join([str(row["item"]), rate_idx, genres, directors, actors])
-    item_feat_dict[str(row["item"])] = item_feat
-
     # for generating the item_feat_df
     item_id_list.append(str(row["item"]))
     rate_id_list.append(rate_idx)
@@ -159,7 +151,6 @@ item_feat_df = pd.DataFrame({
 })
 
 print("pause")
-
 
 
 # reverse_dict
@@ -268,18 +259,12 @@ def udf(df):
 
 
 X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
-ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
+ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq"])
+                                                                                                                                                 # "director_seq", "actor_seq"])
 
 
-print("pause")
 
 # 切分 新/老item
-
-
-
-
-
-
 
 # pd.merge(left=ui_data_new, right= , )
 

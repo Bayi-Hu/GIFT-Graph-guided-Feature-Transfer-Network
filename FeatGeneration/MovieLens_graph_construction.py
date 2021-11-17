@@ -166,17 +166,33 @@ MAX_LENGTH_IA = 30
 
 def mapGid2Iid_ia(x):
     # x is a list of lists
-    return idx2string_ia[x]
+    y = idx2string_ia[x]
+    y = y.split("_")[1]
+    return y
+
+gift_iids = []
+gift_ratings = []
+gift_genres = []
+gift_directors = []
+gift_actors = []
+gift_length = []
+
+# 需要将rate_id_list 等转为item_id2rate_id, 因为item_id_list和index并不是一一对应
+iid2rate_id = dict(zip(item_id_list, rate_id_list))
+iid2genre_ids = dict(zip(item_id_list, genre_ids_list))
+iid2director_ids = dict(zip(item_id_list, director_ids_list))
+iid2actor_ids = dict(zip(item_id_list, actor_ids_list))
 
 for iid in i_vertices:
 
     gid = string2idx_ia[iid] # use for reduce itself
     g_aids = g_ia.neighbors(vertex = iid)
     g_iids = g_ia.neighborhood(vertices=g_aids)
-    g_iids = np.unique(np.concatenate(g_iids, axis=0))
-    g_iids = list(np.random.permutation(g_iids))
-    g_iids.remove(gid)
+    g_iids = np.concatenate(g_iids, axis=0)
+    g_iids = list(set(g_iids).difference(set(g_aids)).difference([gid]))
     iids = list(map(mapGid2Iid_ia, g_iids))
+    iids = np.random.permutation(iids)
+
     print(len(iids))
 
     if len(iids)> MAX_LENGTH_IA:
@@ -186,49 +202,74 @@ for iid in i_vertices:
         num = len(iids)
 
     # 将特征进行组合, 注意需要将sequence特征拆开
+    # feature 有 rating, actors, directors,
+    rating_seq = []
+    genre_seq = []
+    director_seq = []
+    actor_seq = []
+
+    for iid in iids:
+
+        rating_seq.append(iid2rate_id[iid])
+        genre_seq.append(iid2genre_ids[iid])
+        director_seq.append(iid2director_ids[iid])
+        actor_seq.append(iid2actor_ids[iid])
+
+    iids = ",".join(iids)
+    rating_seq = ",".join(rating_seq)
+    genre_seq = ",".join(genre_seq)
+    director_seq = ",".join(director_seq)
+    actor_seq = ",".join(director_seq)
+
+    gift_iids.append(iids)
+    gift_ratings.append(rating_seq)
+    gift_genres.append(genre_seq)
+    gift_directors.append(director_seq)
+    gift_actors.append(actor_seq)
+    gift_length.append(num)
+
+# generate dataframe for item feat
+gift_ia_df = pd.DataFrame({
+    "item": item_id_list,
+    "gift_ia_item": gift_iids,
+    "gift_ia_rating": gift_ratings,
+    "gift_ia_genre": gift_genres,
+    "gift_ia_director": gift_directors,
+    "gift_ia_actor": gift_actors,
+    "gift_ia_length": gift_length
+})
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+# # for item director graph
+# g_id = igraph.Graph()
+# g_id.add_vertices(i_vertices)
+# g_id.add_vertices(d_vertices)
+# g_id.add_edges(id_edges)
 #
-g_id = igraph.Graph()
-g_id.add_vertices(i_vertices)
-g_id.add_vertices(d_vertices)
-g_id.add_edges(id_edges)
-
-idx2string_id = dict(zip(range(len(g_ia.vs["name"])), g_ia.vs["name"]))
-string2idx_id = dict(zip(g_ia.vs["name"], range(len(g_ia.vs["name"]))))
-# MAX_LENGTH_ID = 30
-
-def mapGid2Iid_id(x):
-    # x is a list of lists
-    return idx2string_ia[x]
-
-for iid in i_vertices:
-
-    gid = string2idx_id[iid] # use for reduce itself
-    g_dids = g_id.neighbors(vertex = iid)
-    g_iids = g_id.neighborhood(vertices=g_dids)
-    g_iids = np.unique(np.concatenate(g_iids, axis=0))
-    g_iids = list(np.random.permutation(g_iids))
-    g_iids.remove(gid)
-    iids = list(map(mapGid2Iid_id, g_iids))
-    print(len(iids))
-
-    # if len(iids)> MAX_LENGTH_IA:
-    #     iids = iids[:MAX_LENGTH_IA]
-    #     num = MAX_LENGTH_IA
-    # else:
-    #     num = len(iids)
-
-    # 将特征进行组合
+# idx2string_id = dict(zip(range(len(g_ia.vs["name"])), g_ia.vs["name"]))
+# string2idx_id = dict(zip(g_ia.vs["name"], range(len(g_ia.vs["name"]))))
+# # MAX_LENGTH_ID = 30
+#
+# def mapGid2Iid_id(x):
+#     # x is a list of lists
+#     return idx2string_ia[x]
+#
+# for iid in i_vertices:
+#
+#     gid = string2idx_id[iid] # use for reduce itself
+#     g_dids = g_id.neighbors(vertex = iid)
+#     g_iids = g_id.neighborhood(vertices=g_dids)
+#     g_iids = np.unique(np.concatenate(g_iids, axis=0))
+#     g_iids = list(np.random.permutation(g_iids))
+#     g_iids.remove(gid)
+#     iids = list(map(mapGid2Iid_id, g_iids))
+#     print(len(iids))
+#
+#     # if len(iids)> MAX_LENGTH_IA:
+#     #     iids = iids[:MAX_LENGTH_IA]
+#     #     num = MAX_LENGTH_IA
+#     # else:
+#     #     num = len(iids)
+#
+#     # 将特征进行组合

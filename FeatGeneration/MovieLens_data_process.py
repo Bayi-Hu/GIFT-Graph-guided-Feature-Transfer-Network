@@ -17,13 +17,9 @@ input_dir = 'MovieLens-1M/'
 
 # read logs
 ui_data = pd.read_csv(input_dir+'ratings.txt', names=['user', 'item', 'rating', 'timestamp'],sep="::", engine='python')
-
 ui_data.loc[ui_data[ui_data.rating < 4].index, 'label'] = "0"
 ui_data.loc[ui_data[ui_data.rating >= 4].index, 'label'] = "1"
-
 ui_data = ui_data.astype("str")
-
-print(len(ui_data))
 
 # read item/user feature
 user_data = pd.read_csv(input_dir+'users.txt', names=['user', 'gender', 'age', 'occupation_code', 'zip'],
@@ -46,7 +42,6 @@ zipcode_list = load_list("{}/m_zipcode.txt".format(input_dir))
 len(rate_list), len(genre_list), len(actor_list), len(director_list), len(gender_list), len(age_list), len(occupation_list), len(zipcode_list)
 
 # TODO: user sequence, user feature (user id, gender, occupation_code, zip), item feature
-#
 
 def user_converting(row, gender_list, age_list, occupation_list, zipcode_list):
     user_idx = str(row["user"])
@@ -57,7 +52,6 @@ def user_converting(row, gender_list, age_list, occupation_list, zipcode_list):
 
     return user_idx, gender_idx, age_idx, occupation_idx, zip_idx
     # return "\t".join([user_idx, gender_idx, age_idx, occupation_idx, zip_idx])
-
 
 # user feature -----------------------------------------------------
 user_id_list = []
@@ -95,21 +89,16 @@ def item_converting(row, rate_list, genre_list, director_list, actor_list):
         idx = genre_list.index(genre)
         genre_idx.append(str(idx))
 
-    # genres = "".join(genre_idx)
-
     director_idx = []
     for director in str(row['director']).split(", "):
         idx = director_list.index(re.sub(r'\([^()]*\)', '', director))
         director_idx.append(str(idx))  # id starts from 1, not index
-
-    # directors = "".join(director_idx)
 
     actor_idx = []
     for actor in str(row['actors']).split(", "):
         idx = actor_list.index(actor)
         actor_idx.append(str(idx))
 
-    # actors = "".join(actor_idx)
     return rate_idx, genre_idx, director_idx, actor_idx
 
 # -----------------------------------------------------
@@ -151,7 +140,6 @@ item_feat_df = pd.DataFrame({
 })
 
 print("pause")
-
 
 # reverse_dict
 def reverse_dict(d):
@@ -259,19 +247,19 @@ def udf(df):
 
 
 X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
-ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq"])
-                                                                                                                                                 # "director_seq", "actor_seq"])
+ui_sample_base = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq"])
 
+# store                                                                                                                                                 # "director_seq", "actor_seq"])
+# ui_sample_base.to_csv("ui_sample_base.csv", index=False)
 
+gift_feat = pd.read_csv(input_dir+"gift_df.csv")
+ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="left")
 
-# 切分 新/老item
+# 切分 新/老 movies: rules: divided the movies into movies released before 1997 and after 1998 (approximately 8:2)
+# old: <= 1997.12.31
+# new: >= 1998.1.1
 
-# pd.merge(left=ui_data_new, right= , )
-
-# item feature used for GIFT
-# target item
-# gift_sequence
-
-
-# 切分
+ui_sample_gift_new = pd.merge(left=ui_sample_gift, right=item_data[item_data.year >=1998][["item"]], how="inner", on="item")
+ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
+ui_sample_gift.to_csv("ui_sample_gift.csv", sep="\t", header=0, index=0)
 

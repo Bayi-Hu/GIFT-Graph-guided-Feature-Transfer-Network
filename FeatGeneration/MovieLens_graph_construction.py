@@ -214,7 +214,7 @@ for iid in i_vertices:
     rating_seq = ",".join(rating_seq)
     genre_seq = ",".join(genre_seq)
     director_seq = ",".join(director_seq)
-    actor_seq = ",".join(director_seq)
+    actor_seq = ",".join(actor_seq)
 
     gift_ia_iids.append(iids)
     gift_ia_ratings.append(rating_seq)
@@ -298,7 +298,7 @@ for iid in i_vertices:
     rating_seq = ",".join(rating_seq)
     genre_seq = ",".join(genre_seq)
     director_seq = ",".join(director_seq)
-    actor_seq = ",".join(director_seq)
+    actor_seq = ",".join(actor_seq)
 
     gift_id_iids.append(iids)
     gift_id_ratings.append(rating_seq)

@@ -180,8 +180,53 @@ print(len(a_movies), len(d_movies))
 # postive sample
 pos_ui_data = ui_data[ui_data.label=="1"].copy()
 
+# pos_ui_item_feat = pd.merge(left=pos_ui_data[["user", "item", "timestamp"]],
+#                             right=item_feat_df, on=["item"], how="left", sort=False)
+#
+#
+# # confine the timestamp of item in sequence less than that of target item
+# X = pd.merge(left=ui_data[["user", "item", "timestamp", "label"]], right=pos_ui_item_feat, how='left', on=["user"], sort=False)
+# X = X[X.timestamp_x > X.timestamp_y]
+#
+# # group by according to user and timestamp_x and sort the sequence based on timestamp_y
+#
+# def udf(df):
+#     def takeFirst(elem):
+#         return elem[0]
+#
+#     # output = []
+#     item_seq = []
+#     rating_seq = []
+#     genre_seq = []
+#     director_seq = []
+#     actor_seq = []
+#
+#     X = list(zip(df.timestamp_y, df.item_y, df.rating, df.genre, df.director, df.actor))
+#     X.sort(key=takeFirst, reverse=True)
+#     length = 0
+#     for x in X:  # set max length to 100
+#         item_seq.append(str(x[1]))
+#         rating_seq.append(str(x[2]))
+#         genre_seq.append(str(x[3]))
+#         director_seq.append(str(x[4]))
+#         actor_seq.append(str(x[5]))
+#
+#         length += 1
+#         if length >= 50:
+#             break
+#
+#     return np.array([[df.iloc[0]["user"], df.iloc[0]["item_x"], df.iloc[0]["timestamp_x"], df.iloc[0]["label"],
+#                       str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq),
+#                       ",".join(director_seq), ",".join(actor_seq)]])
+#
+#
+# X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
+# ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
+
+
+# 第二种策略是不构建复杂的sequence特征
 pos_ui_item_feat = pd.merge(left=pos_ui_data[["user", "item", "timestamp"]],
-                            right=item_feat_df, on=["item"], how="left", sort=False)
+                            right=item_feat_df[["item", "rating", "genre"]], on=["item"], how="left", sort=False)
 
 
 # confine the timestamp of item in sequence less than that of target item
@@ -198,32 +243,38 @@ def udf(df):
     item_seq = []
     rating_seq = []
     genre_seq = []
-    director_seq = []
-    actor_seq = []
+    # director_seq = []
+    # actor_seq = []
 
-    X = list(zip(df.timestamp_y, df.item_y, df.rating, df.genre, df.director, df.actor))
+    X = list(zip(df.timestamp_y, df.item_y, df.rating, df.genre))
+                 # , df.director, df.actor))
+
     X.sort(key=takeFirst, reverse=True)
     length = 0
     for x in X:  # set max length to 100
         item_seq.append(str(x[1]))
         rating_seq.append(str(x[2]))
         genre_seq.append(str(x[3]))
-        director_seq.append(str(x[4]))
-        actor_seq.append(str(x[5]))
+        # director_seq.append(str(x[4]))
+        # actor_seq.append(str(x[5]))
 
         length += 1
-        if length >= 100:
+        if length >= 50:
             break
 
     return np.array([[df.iloc[0]["user"], df.iloc[0]["item_x"], df.iloc[0]["timestamp_x"], df.iloc[0]["label"],
-                      str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq),
-                      ",".join(director_seq), ",".join(actor_seq)]])
+                      str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq)]])
+                      #, ",".join(director_seq), ",".join(actor_seq)]])
 
 
 X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
 ui_data_new = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
 
+
 print("pause")
+
+# 切分 新/老item
+
 
 
 
@@ -232,4 +283,10 @@ print("pause")
 
 # pd.merge(left=ui_data_new, right= , )
 
+# item feature used for GIFT
+# target item
+# gift_sequence
+
+
+# 切分
 

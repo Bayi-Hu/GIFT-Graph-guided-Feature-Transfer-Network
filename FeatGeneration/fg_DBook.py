@@ -6,26 +6,26 @@ class FeatGenerator(object):
     def __init__(self, input_file):
         self.input_file = input_file
         self.feat_config = {
-            "n_user": 1000,
-            "d_user": 32,
+            "n_user": 11000,
+            "d_user": 16,
 
-            "n_item": 1000,
-            "d_item": 32,
+            "n_item": 22000,
+            "d_item": 16,
 
-            "n_group": 1000,
-            "d_group": 32,
+            "n_group": 3000,
+            "d_group": 8,
 
             "n_location": 1000,
-            "d_location": 32,
+            "d_location": 8,
 
-            "n_publisher": 1000,
-            "d_publisher": 32,
+            "n_publisher": 2000,
+            "d_publisher": 8,
 
-            "n_author": 1000,
-            "d_author": 32,
+            "n_author": 11000,
+            "d_author": 16,
 
-            "n_year": 1000,
-            "d_year": 32,
+            "n_year": 100,
+            "d_year": 8,
 
             "max_length": 50,
             "batch_size": 128,
@@ -50,10 +50,9 @@ class FeatGenerator(object):
         gift_author = values[9]
         gift_publisher = values[10]
         gift_year = values[11]
+        gift_length = values[6]
 
-        length = values[6]
-
-        return label, user_id, item_id, category, iid_sequence, cat_sequence, length
+        return label, user, item, groups, location, publisher, author, year, gift_item, gift_author, gift_publisher, gift_year, gift_length
 
     def parse_sequence(self, sequence):
         """
@@ -79,7 +78,8 @@ class FeatGenerator(object):
         dataset = dataset.shuffle(3).repeat(self.feat_config["epoch"]).batch(self.feat_config["batch_size"])
         iterator = dataset.make_one_shot_iterator()
 
-        label, user_id, item_id, category, seq_item_id, seq_category, length = iterator.get_next()
+        label, user, item, groups, location, publisher, author, year, gift_item, gift_author, gift_publisher, gift_year, gift_length = iterator.get_next()
+        # label, user_id, item_id, category, seq_item_id, seq_category, length = iterator.get_next()
 
         seq_item_id = self.parse_sequence(seq_item_id)
         seq_category = self.parse_sequence(seq_category)

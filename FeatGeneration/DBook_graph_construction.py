@@ -116,7 +116,8 @@ gift_ia_df = pd.DataFrame({
     "gift_ia_item": gift_ia_iids,
     "gift_ia_author": gift_ia_author,
     "gift_ia_publisher": gift_ia_publisher,
-    "gift_ia_year": gift_ia_year
+    "gift_ia_year": gift_ia_year,
+    "gift_ia_length": gift_ia_length
 })
 
 print("pause")

@@ -13,10 +13,10 @@ class ModelGIFT(Model):
         self.gift_embedding = tensor_dict["gift_embedding"]
 
         # notice, it should be mask with the length mask ..
-        self.gift_sequence_mask = tf.sequence_mask(self.gift_length, maxlen=100, name="sequence_mask")
+        self.gift_sequence_mask = tf.sequence_mask(self.gift_length, maxlen=50, name="sequence_mask")
         dim = self.gift_embedding.get_shape()[-1]
         mask_2d = tf.tile(tf.expand_dims(self.gift_sequence_mask, axis=2), multiples=[1, 1, dim])
-        self.masked_gift_embedding = self.gift_sequence_mask * tf.cast(mask_2d, tf.float32) # convert bool to float
+        self.masked_gift_embedding = self.gift_embedding * tf.cast(mask_2d, tf.float32) # convert bool to float
         self.gift_embedding_sum = tf.reduce_sum(self.masked_gift_embedding, axis=1)
 
     def GIFT_layer(self):

@@ -1,4 +1,5 @@
 #-*- coding:utf-8 -*-
+import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from FeatGeneration.fg_DBook import FeatGenerator, TensorGenerator
@@ -20,6 +21,9 @@ if __name__ == '__main__':
     model = ModelGIFT(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
     model.build()
 
+    checkpoint_dir = "./save_log"
+    saver = tf.train.Saver()
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         iter = 0
@@ -34,6 +38,6 @@ if __name__ == '__main__':
                 iter += 1
             except Exception as e:
                 print(e)
+                # save model
+                saver.save(sess, os.path.join(checkpoint_dir, "model_gift_"+str(iter)))
                 break
-
-

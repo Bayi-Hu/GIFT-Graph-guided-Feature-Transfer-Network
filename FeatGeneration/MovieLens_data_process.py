@@ -260,6 +260,6 @@ ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="
 # new: >= 1998.1.1
 
 ui_sample_gift_new = pd.merge(left=ui_sample_gift, right=item_data[item_data.year >=1998][["item"]], how="inner", on="item")
-ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
+ui_sample_gift_new = ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
 ui_sample_gift.to_csv("ui_sample_gift.csv", sep="\t", header=0, index=0)
 

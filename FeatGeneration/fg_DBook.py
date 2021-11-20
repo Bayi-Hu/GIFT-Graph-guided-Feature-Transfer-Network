@@ -35,6 +35,7 @@ class FeatGenerator(object):
     def parse_split(self, line):
         parse_res = tf.string_split([line], delimiter="\t")
         values = parse_res.values
+
         user = values[0]
         item = values[1]
         label = values[2]
@@ -50,19 +51,19 @@ class FeatGenerator(object):
         gift_author = values[9]
         gift_publisher = values[10]
         gift_year = values[11]
-        gift_length = values[6]
+        gift_length = values[12]
 
         return label, user, item, groups, location, publisher, author, year, gift_item, gift_author, gift_publisher, gift_year, gift_length
 
-    def parse_sequence(self, sequence):
+    def parse_sequence(self, sequence, max_length, delimiter="", default_value="0"):
         """
         split the sequence and convert to dense tensor
         """
-        split_sequence = tf.string_split(sequence, delimiter="")
+        split_sequence = tf.string_split(sequence, delimiter=delimiter)
         split_sequence = tf.sparse_to_dense(sparse_indices=split_sequence.indices,
                                             output_shape=[self.feat_config["batch_size"],
-                                                          self.feat_config["max_length"]],
-                                            sparse_values=split_sequence.values, default_value="0")
+                                                          max_length],
+                                            sparse_values=split_sequence.values, default_value=default_value)
 
         return split_sequence
 
@@ -79,21 +80,30 @@ class FeatGenerator(object):
         iterator = dataset.make_one_shot_iterator()
 
         label, user, item, groups, location, publisher, author, year, gift_item, gift_author, gift_publisher, gift_year, gift_length = iterator.get_next()
-        # label, user_id, item_id, category, seq_item_id, seq_category, length = iterator.get_next()
+        # Dbook dataset has no sequence feature
 
-        seq_item_id = self.parse_sequence(seq_item_id)
-        seq_category = self.parse_sequence(seq_category)
+        gift_item = self.parse_sequence(gift_item, max_length=50, delimiter=",", default_value="nan")
+        gift_author = self.parse_sequence(gift_author, max_length=50, delimiter=",", default_value="nan")
+        gift_publisher = self.parse_sequence(gift_publisher, max_length=50, delimiter=",", default_value="nan")
+        gift_year = self.parse_sequence(gift_year, max_length=50, delimiter=",", default_value="nan")
 
         features = {}
         features["label"] = tf.one_hot(tf.string_to_number(label, out_type=tf.int32), depth=2)
-        features["user_id"] = user_id
-        features["item_id"] = item_id
-        features["category"] = category
-        features["seq_item_id"] = seq_item_id
-        features["seq_category"] = seq_category
-        features["length"] = tf.string_to_number(length, out_type=tf.int32)
+        features["user"] = user
+        features["item"] = item
+        features["groups"] = groups
+        features["location"] = location
+        features["publisher"] = publisher
+        features["year"] = year
+
+        features["gift_item"] = gift_item
+        features["gift_author"] = gift_author
+        features["gift_publisher"] = gift_publisher
+        features["gift_year"] = gift_year
+        features["gift_length"] = tf.string_to_number(gift_length, out_type=tf.int32)
 
         return features
+
 
 class TensorGenerator(object):
 
@@ -143,3 +153,14 @@ class TensorGenerator(object):
             tensor_dict["label"] = features["label"]
 
         return tensor_dict
+
+
+if __name__ == '__main__':
+
+    train_file = "../FeatGeneration/DBook/ui_sample_gift_new.csv"
+
+    train_fg = FeatGenerator(train_file)
+    train_features = train_fg.feature_generation()
+
+    # tg = TensorGenerator()
+    # train_tensor_dict = tg.embedding_layer(train_features, train_fg.feat_config)

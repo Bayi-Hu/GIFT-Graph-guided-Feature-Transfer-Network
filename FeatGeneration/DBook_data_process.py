@@ -50,14 +50,14 @@ print("pause")
 gift_feat = pd.read_csv(input_dir+"gift_df.csv").astype(str)
 ui_sample_base = pd.merge(left=pd.merge(left=ui_data[["user","item","label"]], right=user_feat_df, on="user", how="inner"),right=item_feat_df, on="item", how="inner")
 ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="left")
-ui_sample_gift.sample(frac=1).reset_index(drop=True)
-ui_sample_gift.to_csv(input_dir+"ui_sample_gift.csv", sep="\t", header=0, index=0)
+ui_sample_gift = ui_sample_gift.sample(frac=1).reset_index(drop=True)
+ui_sample_gift.to_csv(input_dir+"ui_sample_gift.csv", sep="\t", header=0, index=0, na_rep="")
 
 # 切分 新/老 movies: rules: divided the movies into movies released before 1997 and after 1998 (approximately 8:2)
 # new: >= 40
 ui_sample_gift_new = ui_sample_gift[ui_sample_gift.year.astype(int)>=40].copy()
-ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
-ui_sample_gift_new.to_csv(input_dir+"ui_sample_gift_new.csv", sep="\t", header=0, index=0)
+ui_sample_gift_new = ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
+ui_sample_gift_new.to_csv(input_dir+"ui_sample_gift_new.csv", sep="\t", header=0, index=0, na_rep="")
 
 # ui_sample_gift
 # ui_sample_gift_new =

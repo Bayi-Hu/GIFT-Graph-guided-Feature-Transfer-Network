@@ -7,12 +7,11 @@ class Model(object):
 
     def __init__(self, tensor_dict, train_config):
 
-        self.length = tensor_dict["length"]
         self.label = tensor_dict["label"]
 
         self.user_embedding = tensor_dict["user_embedding"]
         self.item_embedding = tensor_dict["item_embedding"]
-        self.opt_seq_embedding = tensor_dict["opt_seq_embedding"]
+
         # .. will add
 
         # configuration

@@ -8,6 +8,9 @@ class ModelSeq(Model):
     def __init__(self, tensor_dict, train_config):
         super(ModelSeq, self).__init__(tensor_dict, train_config)
 
+        self.length = tensor_dict["length"]
+        self.opt_seq_embedding = tensor_dict["opt_seq_embedding"]
+
         # notice, it should be mask with the length mask ..
         self.sequence_mask = tf.sequence_mask(self.length, maxlen=100, name="sequence_mask")
         dim = self.opt_seq_embedding.get_shape()[-1]

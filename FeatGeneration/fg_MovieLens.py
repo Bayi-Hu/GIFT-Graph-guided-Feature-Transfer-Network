@@ -18,7 +18,7 @@ class FeatGenerator(object):
             "n_age": 10,
             "d_age": 4,
 
-            "n_ocupation": 30,
+            "n_occupation": 30,
             "d_occupation": 8,
 
             "n_zip": 4000,
@@ -109,35 +109,69 @@ class FeatGenerator(object):
         dataset = dataset.shuffle(3).repeat(self.feat_config["epoch"]).batch(self.feat_config["batch_size"])
         iterator = dataset.make_one_shot_iterator()
 
-        label, user, item, gender, age, occupation, zip, rating, genre, director, actor, item_seq, rating_seq, genre_seq, length, \
+        label, user, item, gender, age, occupation, zip, rating, genre, director, actor, seq_item, seq_rating, seq_genre, length, \
         gift_ia_item, gift_ia_rating, gift_ia_genre, gift_ia_director, gift_ia_actor, gift_ia_length, \
         gift_id_item, gift_id_rating, gift_id_genre, gift_id_director, gift_id_actor, gift_id_length = iterator.get_next()
-        # Dbook dataset has no sequence feature
 
+        # sequence
+        SEQ_MAX_LENGTH = 50
+        seq_item = self.parse_sequence(seq_item, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
+        seq_rating = self.parse_sequence(seq_rating, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
+        seq_genre = self.parse_sequence(seq_genre, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
 
-        # gift_item = self.parse_sequence(gift_item, max_length=50, delimiter=",", default_value="nan")
-        # gift_author = self.parse_sequence(gift_author, max_length=50, delimiter=",", default_value="nan")
-        # gift_publisher = self.parse_sequence(gift_publisher, max_length=50, delimiter=",", default_value="nan")
-        # gift_year = self.parse_sequence(gift_year, max_length=50, delimiter=",", default_value="nan")
+        # gift sequence
+        # ia
+        GIFT_IA_MAX_LENGTH = 50
+        gift_ia_item = self.parse_sequence(gift_ia_item, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_ia_rating = self.parse_sequence(gift_ia_rating, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_ia_genre = self.parse_sequence(gift_ia_genre, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_ia_director = self.parse_sequence(gift_ia_director, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_ia_actor = self.parse_sequence(gift_ia_actor, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+
+        # id
+        GIFT_ID_MAX_LENGTH = 30
+        gift_id_item = self.parse_sequence(gift_id_item, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_rating = self.parse_sequence(gift_id_rating, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_genre = self.parse_sequence(gift_id_genre, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_director = self.parse_sequence(gift_id_director, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_actor = self.parse_sequence(gift_id_actor, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
 
         features = {}
+
         features["label"] = tf.one_hot(tf.string_to_number(label, out_type=tf.int32), depth=2)
         features["user"] = user
         features["item"] = item
-        # features["groups"] = groups
-        # features["location"] = location
-        # features["author"] = author
-        # features["publisher"] = publisher
-        # features["year"] = year
-        #
-        # features["gift_item"] = gift_item
-        # features["gift_author"] = gift_author
-        # features["gift_publisher"] = gift_publisher
-        # features["gift_year"] = gift_year
-        # features["gift_length"] = tf.string_to_number(gift_length, out_type=tf.int32)
+        features["gender"] = gender
+        features["age"] = age
+        features["occupation"] = occupation
+        features["zip"] = zip
+        features["genre"] = genre
+        features["rating"] = rating
+        features["director"] = director
+        features["actor"] = actor
+
+        # sequence
+        features["seq_item"] = seq_item
+        features["seq_rating"] = seq_rating
+        features["seq_genre"] = seq_genre
+        features["length"] = length
+
+        # gift_sequence
+        features["gift_ia_item"] = gift_ia_item
+        features["gift_ia_rating"] = gift_ia_rating
+        features["gift_ia_genre"] = gift_ia_genre
+        features["gift_ia_actor"] = gift_ia_actor
+        features["gift_ia_director"] = gift_ia_director
+        features["gift_ia_length"] = tf.string_to_number(gift_ia_length, out_type=tf.int32)
+
+        features["gift_id_item"] = gift_id_item
+        features["gift_id_rating"] = gift_id_rating
+        features["gift_id_genre"] = gift_id_genre
+        features["gift_id_actor"] = gift_id_actor
+        features["gift_id_director"] = gift_id_director
+        features["gift_id_length"] = tf.string_to_number(gift_id_length, out_type=tf.int32)
 
         return features
-
 
 class TensorGenerator(object):
 
@@ -150,11 +184,14 @@ class TensorGenerator(object):
 
             user_lookup_table = tf.get_variable("user_embedding_var", [feat_config["n_user"], feat_config["d_user"]])
             item_lookup_table = tf.get_variable("item_embedding_var", [feat_config["n_item"], feat_config["d_item"]])
-            group_lookup_table = tf.get_variable("group_embedding_var", [feat_config["n_group"], feat_config["d_group"]])
-            location_lookup_table = tf.get_variable("location_embedding_var", [feat_config["n_location"], feat_config["d_location"]])
-            publisher_lookup_table = tf.get_variable("publisher_embedding_var", [feat_config["n_publisher"], feat_config["d_publisher"]])
-            author_lookup_table = tf.get_variable("author_embedding_var", [feat_config["n_author"], feat_config["d_author"]])
-            year_lookup_table = tf.get_variable("year_embedding_var", [feat_config["n_year"], feat_config["d_year"]])
+
+            rating_lookup_table = tf.get_variable("rating_embedding_var", [feat_config["n_rating"], feat_config["d_rating"]])
+            age_lookup_table = tf.get_variable("age_embedding_var", [feat_config["n_age"], feat_config["d_age"]])
+            occupation_lookup_table = tf.get_variable("occupation_embedding_var", [feat_config["n_occupation"], feat_config["d_occupation"]])
+            zip_lookup_table = tf.get_variable("zip_embedding_var", [feat_config["n_zip"], feat_config["d_zip"]])
+            genre_look_table = tf.get_variable("genre_embedding_var", [feat_config["n_genre"], feat_config["d_zip"]])
+            actor_look_table = tf.get_variable("actor_embedding_var", [feat_config["n_actor"], feat_config["d_actor"]])
+            director_look_table = tf.get_variable("director_embedding_var", [feat_config["n_director"], feat_config["d_director"]])
 
             # add to summary
             # tf.summary.histogram('user_lookup_table', user_lookup_table)
@@ -162,82 +199,87 @@ class TensorGenerator(object):
             # user feature
             user_embedding = tf.nn.embedding_lookup(user_lookup_table,
                                                     tf.string_to_hash_bucket_fast(features["user"],
-                                                                                 feat_config["n_user"]))
-
-            location_embedding = tf.nn.embedding_lookup(location_lookup_table,
-                                                        tf.string_to_hash_bucket_fast(features["location"],
-                                                                                      feat_config["n_location"]))
-
+                                                                                  feat_config["n_user"]))
+            age_embedding = tf.nn.embedding_lookup(age_lookup_table,
+                                                    tf.string_to_hash_bucket_fast(features["age"],
+                                                                                  feat_config["n_age"]))
+            zip_embedding = tf.nn.embedding_lookup(zip_lookup_table,
+                                                   tf.string_to_hash_bucket_fast(features["zip"],
+                                                                                 feat_config["n_age"]))
             # item feature
             item_embedding = tf.nn.embedding_lookup(item_lookup_table,
                                                     tf.string_to_hash_bucket_fast(features["item"],
                                                                                  feat_config["n_item"]))
-
-            author_embedding = tf.nn.embedding_lookup(author_lookup_table,
-                                                      tf.string_to_hash_bucket_fast(features["author"],
-                                                                                    feat_config["n_author"]))
-
-            publisher_embedding = tf.nn.embedding_lookup(publisher_lookup_table,
-                                                         tf.string_to_hash_bucket_fast(features["publisher"],
-                                                                                       feat_config["n_publisher"]))
-
-            year_embedding = tf.nn.embedding_lookup(year_lookup_table,
-                                                    tf.string_to_hash_bucket_fast(features["year"],
-                                                                                  feat_config["n_year"]))
-
-
-            # item sequence
-            # seq_iid_embedding = tf.nn.embedding_lookup(iid_lookup_table,
-            #                                            tf.string_to_hash_bucket_fast(features["seq_item_id"],
-            #                                                                          feat_config["n_iid"]))
+            rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
+                                                      tf.string_to_hash_bucket_fast(features["rating"],
+                                                                                    feat_config["n_rating"]))
+            # _embedding = tf.nn.embedding_lookup(_lookup_table,
+            #                                     tf.string_to_hash_bucket_fast(features[""],
+            #                                                                   feat_config["n_"]))
             #
-            # seq_cat_embedding = tf.nn.embedding_lookup(cat_lookup_table,
-            #                                            tf.string_to_hash_bucket_fast(features["seq_category"],
-            #                                                                          feat_config["n_cid"]))
-
+            # _embedding = tf.nn.embedding_lookup(_lookup_table,
+            #                                     tf.string_to_hash_bucket_fast(features[""],
+            #                                                                   feat_config["n_"]))
+            # item sequence
+            seq_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
+                                                        tf.string_to_hash_bucket_fast(features["seq_item"],
+                                                                                      feat_config["n_item"]))
+            seq_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
+                                                       tf.string_to_hash_bucket_fast(features["seq_rating"],
+                                                                                     feat_config["n_rating"]))
             # gift sequence
-            gift_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
-                                                         tf.string_to_hash_bucket_fast(features["gift_item"],
-                                                                                       feat_config["n_item"]))
-
-            gift_author_embedding = tf.nn.embedding_lookup(author_lookup_table,
-                                                           tf.string_to_hash_bucket_fast(features["gift_author"],
-                                                                                         feat_config["n_author"]))
-
-            gift_publisher_embedding = tf.nn.embedding_lookup(publisher_lookup_table,
-                                                              tf.string_to_hash_bucket_fast(features["gift_publisher"],
-                                                                                            feat_config["n_publisher"]))
-
-            gift_year_embedding = tf.nn.embedding_lookup(year_lookup_table,
-                                                         tf.string_to_hash_bucket_fast(features["gift_year"],
-                                                                                       feat_config["n_year"]))
-
+            # ia
+            gift_ia_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
+                                                            tf.string_to_hash_bucket_fast(features["gift_ia_item"],
+                                                                                          feat_config["n_item"]))
+            gift_ia_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
+                                                              tf.string_to_hash_bucket_fast(features["gift_ia_rating"],
+                                                                                            feat_config["n_rating"]))
+            # id
+            gift_id_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
+                                                            tf.string_to_hash_bucket_fast(features["gift_id_item"],
+                                                                                          feat_config["n_item"]))
+            gift_id_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
+                                                            tf.string_to_hash_bucket_fast(features["gift_id_rating"],
+                                                                                          feat_config["n_rating"]))
+            # gift_actor_embedding = tf.nn.embedding_lookup(actor_lookup_table,
+            #                                                tf.string_to_hash_bucket_fast(features["gift_ia_author"],
+            #                                                                              feat_config["n_author"]))
+            #
+            # gift_publisher_embedding = tf.nn.embedding_lookup(publisher_lookup_table,
+            #                                                   tf.string_to_hash_bucket_fast(features["gift_publisher"],
+            #                                                                                 feat_config["n_publisher"]))
 
             # concatenate the tensors
             tensor_dict = {}
-            tensor_dict["user_embedding"] = tf.concat([user_embedding, location_embedding], 1)
-            tensor_dict["item_embedding"] = tf.concat([item_embedding, author_embedding, publisher_embedding, year_embedding], 1)
-
-            # tensor_dict["opt_seq_embedding"] = tf.concat([seq_iid_embedding, seq_cat_embedding], 2)
+            tensor_dict["user_embedding"] = tf.concat([user_embedding, age_embedding, zip_embedding], 1)
+            tensor_dict["item_embedding"] = tf.concat([item_embedding, rating_embedding], 1)
+            tensor_dict["opt_seq_embedding"] = tf.concat([seq_item_embedding, seq_rating_embedding], 2)
 
             # gift feature
-            tensor_dict["gift_embedding"] = tf.concat([gift_item_embedding, gift_author_embedding, gift_publisher_embedding, gift_year_embedding], 2)
-            tensor_dict["gift_length"] = features["gift_length"]
+            # ia
+            tensor_dict["gift_ia_embedding"] = tf.concat([gift_ia_item_embedding, gift_ia_rating_embedding], 2)
+            tensor_dict["gift_ia_length"] = features["gift_ia_length"]
+            tensor_dict["label"] = features["label"]
+
+            # id
+            tensor_dict["gift_id_embedding"] = tf.concat([gift_id_item_embedding, gift_id_rating_embedding], 2)
+            tensor_dict["gift_id_length"] = features["gift_id_length"]
             tensor_dict["label"] = features["label"]
 
         return tensor_dict
 
 if __name__ == '__main__':
 
-    train_file = "../FeatGeneration/MovieLens-1M/ui_sample_gift_new_test.csv"
+    file = "../FeatGeneration/MovieLens-1M/ui_sample_gift_new_test.csv"
 
-    train_fg = FeatGenerator(train_file)
-    train_features = train_fg.feature_generation()
+    fg = FeatGenerator(file)
+    features = fg.feature_generation()
 
-    # tg = TensorGenerator()
-    # train_tensor_dict = tg.embedding_layer(train_features, train_fg.feat_config)
-    print("pause")
+    tg = TensorGenerator()
+    tensor_dict = tg.embedding_layer(features, fg.feat_config)
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
+    print("pause")
     # sess.run(train_tensor_dict["user_embedding"])
 

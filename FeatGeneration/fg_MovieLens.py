@@ -140,17 +140,16 @@ class FeatGenerator(object):
         seq_genre_split = tf.string_split(seq_genre_flat, delimiter="")
 
         def nan_convert(x):
-            if x == "nan":
+            if tf.equal(x, "nan"):
                 return "-1"
             else:
                 return x
 
-
-        seq_genre_split_values = seq_genre_split.values
-        seq_genre_split_values[tf.where(seq_genre_split_values=="nan")] = "-1"
+        seq_genre_split_values = tf.map_fn(nan_convert, seq_genre_split.values)
         seq_genre_new = tf.SparseTensor(indices=seq_genre_split.indices, values=tf.string_to_number(seq_genre_split_values, out_type=tf.int32),
                                         dense_shape=seq_genre_split.dense_shape)  # convert string to int32
 
+        tf.sparse_reshape(seq_genre_new, shape=[128,50])
 
         # gift sequence
         # ia

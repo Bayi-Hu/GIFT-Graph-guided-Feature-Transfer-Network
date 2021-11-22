@@ -248,6 +248,9 @@ def udf(df):
 
 X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
 ui_sample_base = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq"])
+# join 一下user特征
+
+ui_sample_base = pd.merge(left=ui_sample_base, right=user_feat_df, on="user", how="left", sort=False)
 
 # store                                                                                                                                                 # "director_seq", "actor_seq"])
 # ui_sample_base.to_csv("ui_sample_base.csv", index=False)
@@ -259,7 +262,26 @@ ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="
 # old: <= 1997.12.31
 # new: >= 1998.1.1
 
-ui_sample_gift_new = pd.merge(left=ui_sample_gift, right=item_data[item_data.year >=1998][["item"]], how="inner", on="item")
-ui_sample_gift_new = ui_sample_gift_new.sample(frac=1).reset_index(drop=True)
-ui_sample_gift.to_csv("ui_sample_gift.csv", sep="\t", header=0, index=0)
+ui_sample_gift = pd.merge(left=ui_sample_gift, right=item_data[["item","year"]], how="left", on="item", sort=False)
+ui_sample_gift_new = ui_sample_gift[ui_sample_gift.year.astype(int)>=1998].copy()
+ui_sample_gift_new = ui_sample_gift_new.sample(frac=1)
 
+# new_train & new_test split
+ui_sample_gift_new_test = ui_sample_gift_new.sample(frac=0.2)
+res_index = set(ui_sample_gift_new.index).difference(set(ui_sample_gift_new_test.index))
+ui_sample_gift_new_train = ui_sample_gift_new.loc[list(res_index)]
+
+# shuffle
+ui_sample_gift_new_train = ui_sample_gift_new_train.sample(frac=1)
+ui_sample_gift_new_test = ui_sample_gift_new_test.sample(frac=1)
+
+ui_sample_gift_new_train.to_csv(input_dir+"ui_sample_gift_new_train.csv", sep="\t", header=0, index=0, na_rep="")
+ui_sample_gift_new_test.to_csv(input_dir+"ui_sample_gift_new_test.csv", sep="\t", header=0, index=0, na_rep="")
+
+# full for training
+train_index = set(ui_sample_gift.index).difference(set(ui_sample_gift_new_test.index))
+ui_sample_gift_full_train = ui_sample_gift.loc[list(train_index)]
+
+# shuffle
+ui_sample_gift_full_train = ui_sample_gift_full_train.sample(frac=1)
+ui_sample_gift_full_train.to_csv(input_dir+"ui_sample_gift_full_train.csv", sep="\t", header=0, index=0, na_rep="")

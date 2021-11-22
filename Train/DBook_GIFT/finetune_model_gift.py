@@ -7,7 +7,7 @@ from Model.model_gift import ModelGIFT
 
 if __name__ == '__main__':
 
-    train_file = "../../FeatGeneration/DBook/ui_sample_gift_full_train.csv"
+    train_file = "../../FeatGeneration/DBook/ui_sample_gift_pretrain.csv"
 
     train_fg = FeatGenerator(train_file)
     train_features = train_fg.feature_generation()
@@ -38,5 +38,5 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
                 # save model
-                saver.save(sess, os.path.join(checkpoint_dir, "model_gift_"+str(iter)))
+                saver.save(sess, os.path.join(checkpoint_dir, "pretrain_model_gift_"+str(iter)))
                 break

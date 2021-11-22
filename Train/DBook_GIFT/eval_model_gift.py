@@ -9,7 +9,7 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    test_file = "../../FeatGeneration/DBook/ui_sample_gift_new.csv"
+    test_file = "../../FeatGeneration/DBook/ui_sample_gift_new_test.csv"
 
     test_fg = FeatGenerator(test_file)
     test_features = test_fg.feature_generation()
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = ModelGIFT(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
     model.build()
 
-    ckpt = "./save_log/model_gift_2113"
+    ckpt = "./save_log/model_gift_19729"
     saver = tf.train.Saver()
 
     logits = []

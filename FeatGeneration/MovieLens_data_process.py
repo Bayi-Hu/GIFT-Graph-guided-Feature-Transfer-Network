@@ -262,7 +262,7 @@ ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="
 # old: <= 1997.12.31
 # new: >= 1998.1.1
 
-ui_sample_gift = pd.merge(left=ui_sample_gift, right=item_data[["item","year"]], how="left", on="item", sort=False)
+ui_sample_gift = pd.merge(left=ui_sample_gift, right=item_data[["item", "year"]], how="left", on="item", sort=False)
 ui_sample_gift_new = ui_sample_gift[ui_sample_gift.year.astype(int)>=1998].copy()
 ui_sample_gift_new = ui_sample_gift_new.sample(frac=1)
 
@@ -275,8 +275,8 @@ ui_sample_gift_new_train = ui_sample_gift_new.loc[list(res_index)]
 ui_sample_gift_new_train = ui_sample_gift_new_train.sample(frac=1)
 ui_sample_gift_new_test = ui_sample_gift_new_test.sample(frac=1)
 
-ui_sample_gift_new_train.to_csv(input_dir+"ui_sample_gift_new_train.csv", sep="\t", header=0, index=0, na_rep="")
-ui_sample_gift_new_test.to_csv(input_dir+"ui_sample_gift_new_test.csv", sep="\t", header=0, index=0, na_rep="")
+ui_sample_gift_new_train.to_csv(input_dir+"ui_sample_gift_new_train.csv", sep="\t", header=0, index=0, na_rep="nan")
+ui_sample_gift_new_test.to_csv(input_dir+"ui_sample_gift_new_test.csv", sep="\t", header=0, index=0, na_rep="nan")
 
 # full for training
 train_index = set(ui_sample_gift.index).difference(set(ui_sample_gift_new_test.index))
@@ -284,4 +284,4 @@ ui_sample_gift_full_train = ui_sample_gift.loc[list(train_index)]
 
 # shuffle
 ui_sample_gift_full_train = ui_sample_gift_full_train.sample(frac=1)
-ui_sample_gift_full_train.to_csv(input_dir+"ui_sample_gift_full_train.csv", sep="\t", header=0, index=0, na_rep="")
+ui_sample_gift_full_train.to_csv(input_dir+"ui_sample_gift_full_train.csv", sep="\t", header=0, index=0, na_rep="nan")

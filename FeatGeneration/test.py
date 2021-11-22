@@ -5,7 +5,7 @@ tf.disable_v2_behavior()
 csv = [
   "1,harden|james|curry",
   "2,wrestbrook|harden|durant",
-  "3,|paul|towns",
+  "3,aaa|paul|towns"
 ]
 
 TAG_SET = ["harden", "james", "curry", "durant", "paul","towns","wrestbrook"]

@@ -135,6 +135,23 @@ class FeatGenerator(object):
         seq_rating = self.parse_sequence(seq_rating, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
         seq_genre = self.parse_sequence(seq_genre, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
 
+        print("pause")
+        seq_genre_flat = tf.reshape(seq_genre, shape=[128*50])
+        seq_genre_split = tf.string_split(seq_genre_flat, delimiter="")
+
+        def nan_convert(x):
+            if x == "nan":
+                return "-1"
+            else:
+                return x
+
+
+        seq_genre_split_values = seq_genre_split.values
+        seq_genre_split_values[tf.where(seq_genre_split_values=="nan")] = "-1"
+        seq_genre_new = tf.SparseTensor(indices=seq_genre_split.indices, values=tf.string_to_number(seq_genre_split_values, out_type=tf.int32),
+                                        dense_shape=seq_genre_split.dense_shape)  # convert string to int32
+
+
         # gift sequence
         # ia
         GIFT_IA_MAX_LENGTH = 50
@@ -230,9 +247,9 @@ class TensorGenerator(object):
                                                       tf.string_to_hash_bucket_fast(features["rating"],
                                                                                     feat_config["n_rating"]))
 
-            genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["genre"], sp_weights=None)
-            actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["actor"], sp_weights=None)
-            director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["director"], sp_weights=None)
+            genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["genre"], sp_weights=None, combiner="mean")
+            actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["actor"], sp_weights=None, combiner="mean")
+            director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["director"], sp_weights=None, combiner="mean")
 
             # _embedding = tf.nn.embedding_lookup(_lookup_table,
             #                                     tf.string_to_hash_bucket_fast(features[""],

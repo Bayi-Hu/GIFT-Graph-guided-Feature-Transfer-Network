@@ -97,6 +97,7 @@ class FeatGenerator(object):
 
         return split_sequence
 
+
     def feature_generation(self):
         """
         Args:
@@ -112,6 +113,21 @@ class FeatGenerator(object):
         label, user, item, gender, age, occupation, zip, rating, genre, director, actor, seq_item, seq_rating, seq_genre, length, \
         gift_ia_item, gift_ia_rating, gift_ia_genre, gift_ia_director, gift_ia_actor, gift_ia_length, \
         gift_id_item, gift_id_rating, gift_id_genre, gift_id_director, gift_id_actor, gift_id_length = iterator.get_next()
+
+        #
+        print("pause")
+
+        genre = tf.string_split(genre, delimiter="")
+        genre = tf.SparseTensor(indices=genre.indices, values=tf.string_to_number(genre.values, out_type=tf.int32),
+                                dense_shape=genre.dense_shape) # convert string to int32
+
+        actor = tf.string_split(actor, delimiter="")
+        actor = tf.SparseTensor(indices=actor.indices, values=tf.string_to_number(actor.values, out_type=tf.int32),
+                                dense_shape=actor.dense_shape)  # convert string to int32
+
+        director = tf.string_split(director, delimiter="")
+        director = tf.SparseTensor(indices=director.indices, values=tf.string_to_number(director.values, out_type=tf.int32),
+                                   dense_shape=director.dense_shape)  #
 
         # sequence
         SEQ_MAX_LENGTH = 50
@@ -213,6 +229,11 @@ class TensorGenerator(object):
             rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
                                                       tf.string_to_hash_bucket_fast(features["rating"],
                                                                                     feat_config["n_rating"]))
+
+            genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["genre"], sp_weights=None)
+            actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["actor"], sp_weights=None)
+            director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["director"], sp_weights=None)
+
             # _embedding = tf.nn.embedding_lookup(_lookup_table,
             #                                     tf.string_to_hash_bucket_fast(features[""],
             #                                                                   feat_config["n_"]))
@@ -221,6 +242,7 @@ class TensorGenerator(object):
             #                                     tf.string_to_hash_bucket_fast(features[""],
             #                                                                   feat_config["n_"]))
             # item sequence
+
             seq_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
                                                         tf.string_to_hash_bucket_fast(features["seq_item"],
                                                                                       feat_config["n_item"]))
@@ -253,7 +275,7 @@ class TensorGenerator(object):
             # concatenate the tensors
             tensor_dict = {}
             tensor_dict["user_embedding"] = tf.concat([user_embedding, age_embedding, zip_embedding], 1)
-            tensor_dict["item_embedding"] = tf.concat([item_embedding, rating_embedding], 1)
+            tensor_dict["item_embedding"] = tf.concat([item_embedding, rating_embedding, genre_embedding, actor_embedding, director_embedding], 1)
             tensor_dict["opt_seq_embedding"] = tf.concat([seq_item_embedding, seq_rating_embedding], 2)
 
             # gift feature

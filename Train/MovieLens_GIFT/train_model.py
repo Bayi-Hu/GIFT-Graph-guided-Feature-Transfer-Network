@@ -2,7 +2,7 @@
 import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from FeatGeneration.fg_DBook import FeatGenerator, TensorGenerator
+from FeatGeneration.fg_MovieLens import FeatGenerator, TensorGenerator
 from Model.model import Model
 
 if __name__ == '__main__':

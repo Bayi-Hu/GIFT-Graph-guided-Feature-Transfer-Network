@@ -222,8 +222,8 @@ def udf(df):
     item_seq = []
     rating_seq = []
     genre_seq = []
-    # director_seq = []
-    # actor_seq = []
+    director_seq = []
+    actor_seq = []
 
     X = list(zip(df.timestamp_y, df.item_y, df.rating, df.genre))
                  # , df.director, df.actor))
@@ -234,28 +234,28 @@ def udf(df):
         item_seq.append(str(x[1]))
         rating_seq.append(str(x[2]))
         genre_seq.append(str(x[3]))
-        # director_seq.append(str(x[4]))
-        # actor_seq.append(str(x[5]))
+        director_seq.append(str(x[4]))
+        actor_seq.append(str(x[5]))
 
         length += 1
         if length >= 50:
             break
 
     return np.array([[df.iloc[0]["user"], df.iloc[0]["item_x"], df.iloc[0]["timestamp_x"], df.iloc[0]["label"],
-                      str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq)]])
-                      #, ",".join(director_seq), ",".join(actor_seq)]])
+                      str(length), ",".join(item_seq), ",".join(rating_seq), ",".join(genre_seq), ",".join(director_seq), ",".join(actor_seq)]])
 
 
 X_ = X.groupby(["user", "item_x", "timestamp_x", "label"]).apply(udf)
-ui_sample_base = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq"])
+ui_sample_base = pd.DataFrame(np.concatenate(X_.values, axis=0), columns=["user", "item", "timestamp", "label", "length", "item_seq", "rating_seq", "genre_seq", "director_seq", "actor_seq"])
 # join 一下user特征
 
 ui_sample_base = pd.merge(left=ui_sample_base, right=user_feat_df, on="user", how="left", sort=False)
+ui_sample_base = pd.merge(left=ui_sample_base, right=item_feat_df, on="item", how="left", sort=False)
 
 # store                                                                                                                                                 # "director_seq", "actor_seq"])
 # ui_sample_base.to_csv("ui_sample_base.csv", index=False)
 
-gift_feat = pd.read_csv(input_dir+"gift_df.csv")
+gift_feat = pd.read_csv(input_dir+"gift_df.csv").astype(str)
 ui_sample_gift = pd.merge(left=ui_sample_base, right=gift_feat, on="item", how="left")
 
 # 切分 新/老 movies: rules: divided the movies into movies released before 1997 and after 1998 (approximately 8:2)

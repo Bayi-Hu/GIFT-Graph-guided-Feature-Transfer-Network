@@ -1,6 +1,10 @@
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
+SEQ_MAX_LENGTH = 50
+GIFT_IA_MAX_LENGTH = 30
+GIFT_ID_MAX_LENGTH = 30
+
 class FeatGenerator(object):
 
     def __init__(self, input_file):
@@ -50,38 +54,39 @@ class FeatGenerator(object):
         # timestamp = values[2]
         label = values[3]
 
-        gender = values[4]
-        age = values[5]
+        length = values[4]
+        seq_item = values[5]
+        seq_rating = values[6]
+        seq_genre = values[7]
+        seq_director = values[8]
+        seq_actor = values[9]
 
-        occupation = values[6]
-        zip = values[7]
-        rating = values[8]
+        gender = values[10]
+        age = values[11]
+        occupation = values[12]
+        zip = values[13]
+        rating = values[14]
 
-        genre = values[9]
-        director = values[10]
-        actor = values[11]
-
-        item_seq = values[12]
-        rating_seq = values[13]
-        genre_seq = values[14]
-        length = values[15]
+        genre = values[15]
+        director = values[16]
+        actor = values[17]
 
         # gift feature
-        gift_ia_item = values[16]
-        gift_ia_rating = values[17]
-        gift_ia_genre = values[18]
-        gift_ia_director = values[19]
-        gift_ia_actor = values[20]
-        gift_ia_length = values[21]
+        gift_ia_item = values[18]
+        gift_ia_rating = values[19]
+        gift_ia_genre = values[20]
+        gift_ia_director = values[21]
+        gift_ia_actor = values[22]
+        gift_ia_length = values[23]
 
-        gift_id_item = values[22]
-        gift_id_rating = values[23]
-        gift_id_genre = values[24]
-        gift_id_director = values[25]
-        gift_id_actor = values[26]
-        gift_id_length = values[27]
+        gift_id_item = values[24]
+        gift_id_rating = values[25]
+        gift_id_genre = values[26]
+        gift_id_director = values[27]
+        gift_id_actor = values[28]
+        gift_id_length = values[29]
 
-        return label, user, item, gender, age, occupation, zip, rating, genre, director, actor, item_seq, rating_seq, genre_seq, length, \
+        return label, user, item, gender, age, occupation, zip, rating, genre, director, actor, seq_item, seq_rating, seq_genre, seq_actor, seq_director, length, \
                gift_ia_item, gift_ia_rating, gift_ia_genre, gift_ia_director, gift_ia_actor, gift_ia_length, \
                gift_id_item, gift_id_rating, gift_id_genre, gift_id_director, gift_id_actor, gift_id_length
 
@@ -110,7 +115,7 @@ class FeatGenerator(object):
         dataset = dataset.shuffle(3).repeat(self.feat_config["epoch"]).batch(self.feat_config["batch_size"])
         iterator = dataset.make_one_shot_iterator()
 
-        label, user, item, gender, age, occupation, zip, rating, genre, director, actor, seq_item, seq_rating, seq_genre, length, \
+        label, user, item, gender, age, occupation, zip, rating, genre, director, actor, seq_item, seq_rating, seq_genre, seq_actor, seq_director, length, \
         gift_ia_item, gift_ia_rating, gift_ia_genre, gift_ia_director, gift_ia_actor, gift_ia_length, \
         gift_id_item, gift_id_rating, gift_id_genre, gift_id_director, gift_id_actor, gift_id_length = iterator.get_next()
 
@@ -138,10 +143,11 @@ class FeatGenerator(object):
                                    dense_shape=director.dense_shape)  #
 
         # sequence
-        SEQ_MAX_LENGTH = 50
         seq_item = self.parse_sequence(seq_item, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
         seq_rating = self.parse_sequence(seq_rating, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
         seq_genre = self.parse_sequence(seq_genre, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
+        seq_actor = self.parse_sequence(seq_actor, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
+        seq_director = self.parse_sequence(seq_director, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
 
         print("pause")
         seq_genre_split = tf.string_split(tf.reshape(seq_genre, shape=[-1]), delimiter="")
@@ -151,41 +157,62 @@ class FeatGenerator(object):
 
         seq_actor_split = tf.string_split(tf.reshape(seq_actor, shape=[-1]), delimiter="")
         seq_actor = tf.SparseTensor(indices=seq_actor_split.indices,
-                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_actor_split.values),
-                                                               out_type=tf.int32),
+                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_actor_split.values), out_type=tf.int32),
                                     dense_shape=seq_actor_split.dense_shape)  # convert string to int32
 
         seq_director_split = tf.string_split(tf.reshape(seq_director, shape=[-1]), delimiter="")
         seq_director = tf.SparseTensor(indices=seq_director_split.indices,
-                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_director_split.values),
-                                                               out_type=tf.int32),
-                                    dense_shape=seq_director_split.dense_shape)  # convert string to int32
+                                       values=tf.string_to_number(tf.map_fn(nan_convert, seq_director_split.values), out_type=tf.int32),
+                                       dense_shape=seq_director_split.dense_shape)  # convert string to int32
 
 
         # gift sequence
         # ia
-        GIFT_IA_MAX_LENGTH = 50
         gift_ia_item = self.parse_sequence(gift_ia_item, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_ia_rating = self.parse_sequence(gift_ia_rating, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
-
-
         gift_ia_genre = self.parse_sequence(gift_ia_genre, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
-        gift_ia_director = self.parse_sequence(gift_ia_director, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_ia_actor = self.parse_sequence(gift_ia_actor, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_ia_director = self.parse_sequence(gift_ia_director, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+
+        gift_ia_genre_split = tf.string_split(tf.reshape(gift_ia_genre, shape=[-1]), delimiter="")
+        gift_ia_genre = tf.SparseTensor(indices=gift_ia_genre_split.indices,
+                                        values=tf.string_to_number(tf.map_fn(nan_convert, gift_ia_genre_split.values), out_type=tf.int32),
+                                        dense_shape=gift_ia_genre_split.dense_shape)  # convert string to int32
+
+        gift_ia_actor_split = tf.string_split(tf.reshape(gift_ia_actor, shape=[-1]), delimiter="")
+        gift_ia_actor = tf.SparseTensor(indices=gift_ia_actor_split.indices,
+                                        values=tf.string_to_number(tf.map_fn(nan_convert, gift_ia_actor_split.values), out_type=tf.int32),
+                                        dense_shape=gift_ia_actor_split.dense_shape)  # convert string to int32
+
+        gift_ia_director_split = tf.string_split(tf.reshape(gift_ia_director, shape=[-1]), delimiter="")
+        gift_ia_director = tf.SparseTensor(indices=gift_ia_director_split.indices,
+                                           values=tf.string_to_number(tf.map_fn(nan_convert, gift_ia_director_split.values), out_type=tf.int32),
+                                           dense_shape=gift_ia_director_split.dense_shape)  # convert string to int32
 
         # id
-        GIFT_ID_MAX_LENGTH = 30
+
         gift_id_item = self.parse_sequence(gift_id_item, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_id_rating = self.parse_sequence(gift_id_rating, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_genre = self.parse_sequence(gift_id_genre, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_actor = self.parse_sequence(gift_id_actor, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+        gift_id_director = self.parse_sequence(gift_id_director, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
 
         # multihot
 
-        gift_id_genre = self.parse_sequence(gift_id_genre, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
-                                            default_value="nan")
-        gift_id_director = self.parse_sequence(gift_id_director, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
-                                               default_value="nan")
-        gift_id_actor = self.parse_sequence(gift_id_actor, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
-                                            default_value="nan")
+        gift_id_genre_split = tf.string_split(tf.reshape(gift_id_genre, shape=[-1]), delimiter="")
+        gift_id_genre = tf.SparseTensor(indices=gift_id_genre_split.indices,
+                                        values=tf.string_to_number(tf.map_fn(nan_convert, gift_id_genre_split.values), out_type=tf.int32),
+                                        dense_shape=gift_id_genre_split.dense_shape)  # convert string to int32
+
+        gift_id_actor_split = tf.string_split(tf.reshape(gift_id_actor, shape=[-1]), delimiter="")
+        gift_id_actor = tf.SparseTensor(indices=gift_id_actor_split.indices,
+                                        values=tf.string_to_number(tf.map_fn(nan_convert, gift_id_actor_split.values), out_type=tf.int32),
+                                        dense_shape=gift_id_actor_split.dense_shape)  # convert string to int32
+
+        gift_id_director_split = tf.string_split(tf.reshape(gift_id_director, shape=[-1]), delimiter="")
+        gift_id_director = tf.SparseTensor(indices=gift_id_director_split.indices,
+                                           values=tf.string_to_number(tf.map_fn(nan_convert, gift_id_director_split.values), out_type=tf.int32),
+                                           dense_shape=gift_id_director_split.dense_shape)  # convert string to int32
 
         features = {}
 
@@ -242,7 +269,7 @@ class TensorGenerator(object):
             age_lookup_table = tf.get_variable("age_embedding_var", [feat_config["n_age"], feat_config["d_age"]])
             occupation_lookup_table = tf.get_variable("occupation_embedding_var", [feat_config["n_occupation"], feat_config["d_occupation"]])
             zip_lookup_table = tf.get_variable("zip_embedding_var", [feat_config["n_zip"], feat_config["d_zip"]])
-            genre_look_table = tf.get_variable("genre_embedding_var", [feat_config["n_genre"], feat_config["d_zip"]])
+            genre_look_table = tf.get_variable("genre_embedding_var", [feat_config["n_genre"], feat_config["d_genre"]])
             actor_look_table = tf.get_variable("actor_embedding_var", [feat_config["n_actor"], feat_config["d_actor"]])
             director_look_table = tf.get_variable("director_embedding_var", [feat_config["n_director"], feat_config["d_director"]])
 
@@ -256,6 +283,10 @@ class TensorGenerator(object):
             age_embedding = tf.nn.embedding_lookup(age_lookup_table,
                                                     tf.string_to_hash_bucket_fast(features["age"],
                                                                                   feat_config["n_age"]))
+            occupation_embedding = tf.nn.embedding_lookup(occupation_lookup_table,
+                                                          tf.string_to_hash_bucket_fast(features["occupation"],
+                                                                                        feat_config["n_occupation"]))
+
             zip_embedding = tf.nn.embedding_lookup(zip_lookup_table,
                                                    tf.string_to_hash_bucket_fast(features["zip"],
                                                                                  feat_config["n_age"]))
@@ -280,10 +311,16 @@ class TensorGenerator(object):
                                                                                      feat_config["n_rating"]))
             seq_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["seq_genre"],
                                                                 sp_weights=None, combiner="mean")
+            seq_genre_embedding = tf.reshape(seq_genre_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_genre"]])
+
             seq_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_actor"],
                                                                 sp_weights=None, combiner="mean")
+
+            seq_actor_embedding = tf.reshape(seq_genre_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_actor"]])
+
             seq_director_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_director"],
                                                                    sp_weights=None, combiner="mean")
+            seq_director_embedding = tf.reshape(seq_genre_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_director"]])
 
             # gift sequence
             # ia
@@ -296,16 +333,23 @@ class TensorGenerator(object):
 
             gift_ia_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["gift_ia_genre"],
                                                                     sp_weights=None, combiner="mean")
+            gift_ia_genre_embedding = tf.reshape(gift_ia_genre_embedding, [-1, GIFT_IA_MAX_LENGTH, feat_config["d_genre"]])
+
             gift_ia_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["gift_ia_actor"],
                                                                     sp_weights=None, combiner="mean")
+
+            gift_ia_actor_embedding = tf.reshape(gift_ia_actor_embedding, [-1, GIFT_IA_MAX_LENGTH, feat_config["d_actor"]])
+
             gift_ia_director_embedding = tf.nn.embedding_lookup_sparse(director_look_table,
                                                                        sp_ids=features["gift_ia_director"],
                                                                        sp_weights=None, combiner="mean")
+            gift_ia_director_embedding = tf.reshape(gift_ia_director_embedding, [-1, GIFT_IA_MAX_LENGTH, feat_config["d_director"]])
 
             # id
             gift_id_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
                                                             tf.string_to_hash_bucket_fast(features["gift_id_item"],
                                                                                           feat_config["n_item"]))
+
             gift_id_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
                                                               tf.string_to_hash_bucket_fast(features["gift_id_rating"],
                                                                                             feat_config["n_rating"]))
@@ -313,27 +357,31 @@ class TensorGenerator(object):
             gift_id_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["gift_id_genre"],
                                                                     sp_weights=None, combiner="mean")
 
+            gift_id_genre_embedding = tf.reshape(gift_id_genre_embedding, [-1, GIFT_ID_MAX_LENGTH, feat_config["d_genre"]])
+
             gift_id_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["gift_id_actor"],
                                                                     sp_weights=None, combiner="mean")
 
+            gift_id_actor_embedding = tf.reshape(gift_id_actor_embedding, [-1, GIFT_ID_MAX_LENGTH, feat_config["d_actor"]])
+
             gift_id_director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["gift_id_director"],
                                                                        sp_weights=None, combiner="mean")
-
+            gift_id_director_embedding = tf.reshape(gift_id_director_embedding, [-1, GIFT_ID_MAX_LENGTH, feat_config["d_director"]])
 
             # concatenate the tensors
             tensor_dict = {}
-            tensor_dict["user_embedding"] = tf.concat([user_embedding, age_embedding, zip_embedding], 1)
+            tensor_dict["user_embedding"] = tf.concat([user_embedding, age_embedding, occupation_embedding, zip_embedding], 1)
             tensor_dict["item_embedding"] = tf.concat([item_embedding, rating_embedding, genre_embedding, actor_embedding, director_embedding], 1)
-            tensor_dict["opt_seq_embedding"] = tf.concat([seq_item_embedding, seq_rating_embedding], 2)
+            tensor_dict["opt_seq_embedding"] = tf.concat([seq_item_embedding, seq_rating_embedding, seq_genre_embedding, seq_actor_embedding, seq_director_embedding], 2)
 
             # gift feature
             # ia
-            tensor_dict["gift_ia_embedding"] = tf.concat([gift_ia_item_embedding, gift_ia_rating_embedding], 2)
+            tensor_dict["gift_ia_embedding"] = tf.concat([gift_ia_item_embedding, gift_ia_rating_embedding, gift_ia_genre_embedding, gift_ia_actor_embedding, gift_ia_director_embedding], 2)
             tensor_dict["gift_ia_length"] = features["gift_ia_length"]
             tensor_dict["label"] = features["label"]
 
             # id
-            tensor_dict["gift_id_embedding"] = tf.concat([gift_id_item_embedding, gift_id_rating_embedding], 2)
+            tensor_dict["gift_id_embedding"] = tf.concat([gift_id_item_embedding, gift_id_rating_embedding, gift_id_genre_embedding, gift_id_actor_embedding, gift_id_director_embedding], 2)
             tensor_dict["gift_id_length"] = features["gift_id_length"]
             tensor_dict["label"] = features["label"]
 

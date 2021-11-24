@@ -115,18 +115,26 @@ class FeatGenerator(object):
         gift_id_item, gift_id_rating, gift_id_genre, gift_id_director, gift_id_actor, gift_id_length = iterator.get_next()
 
         #
-        print("pause")
+        def nan_convert(x):
+            if tf.equal(x, "nan"):
+                return "0"
+            else:
+                return x
+
 
         genre = tf.string_split(genre, delimiter="")
-        genre = tf.SparseTensor(indices=genre.indices, values=tf.string_to_number(genre.values, out_type=tf.int32),
+        genre = tf.SparseTensor(indices=genre.indices,
+                                values=tf.string_to_number(tf.map_fn(nan_convert, genre.values), out_type=tf.int32),
                                 dense_shape=genre.dense_shape) # convert string to int32
 
         actor = tf.string_split(actor, delimiter="")
-        actor = tf.SparseTensor(indices=actor.indices, values=tf.string_to_number(actor.values, out_type=tf.int32),
+        actor = tf.SparseTensor(indices=actor.indices,
+                                values=tf.string_to_number(tf.map_fn(nan_convert, actor.values), out_type=tf.int32),
                                 dense_shape=actor.dense_shape)  # convert string to int32
 
         director = tf.string_split(director, delimiter="")
-        director = tf.SparseTensor(indices=director.indices, values=tf.string_to_number(director.values, out_type=tf.int32),
+        director = tf.SparseTensor(indices=director.indices,
+                                   values=tf.string_to_number(tf.map_fn(nan_convert, director.values), out_type=tf.int32),
                                    dense_shape=director.dense_shape)  #
 
         # sequence
@@ -136,26 +144,31 @@ class FeatGenerator(object):
         seq_genre = self.parse_sequence(seq_genre, max_length=SEQ_MAX_LENGTH, delimiter=",", default_value="nan")
 
         print("pause")
-        seq_genre_flat = tf.reshape(seq_genre, shape=[128*50])
-        seq_genre_split = tf.string_split(seq_genre_flat, delimiter="")
+        seq_genre_split = tf.string_split(tf.reshape(seq_genre, shape=[-1]), delimiter="")
+        seq_genre = tf.SparseTensor(indices=seq_genre_split.indices,
+                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_genre_split.values), out_type=tf.int32),
+                                    dense_shape=seq_genre_split.dense_shape)  # convert string to int32
 
-        def nan_convert(x):
-            if tf.equal(x, "nan"):
-                return "-1"
-            else:
-                return x
+        seq_actor_split = tf.string_split(tf.reshape(seq_actor, shape=[-1]), delimiter="")
+        seq_actor = tf.SparseTensor(indices=seq_actor_split.indices,
+                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_actor_split.values),
+                                                               out_type=tf.int32),
+                                    dense_shape=seq_actor_split.dense_shape)  # convert string to int32
 
-        seq_genre_split_values = tf.map_fn(nan_convert, seq_genre_split.values)
-        seq_genre_new = tf.SparseTensor(indices=seq_genre_split.indices, values=tf.string_to_number(seq_genre_split_values, out_type=tf.int32),
-                                        dense_shape=seq_genre_split.dense_shape)  # convert string to int32
+        seq_director_split = tf.string_split(tf.reshape(seq_director, shape=[-1]), delimiter="")
+        seq_director = tf.SparseTensor(indices=seq_director_split.indices,
+                                    values=tf.string_to_number(tf.map_fn(nan_convert, seq_director_split.values),
+                                                               out_type=tf.int32),
+                                    dense_shape=seq_director_split.dense_shape)  # convert string to int32
 
-        tf.sparse_reshape(seq_genre_new, shape=[128,50])
 
         # gift sequence
         # ia
         GIFT_IA_MAX_LENGTH = 50
         gift_ia_item = self.parse_sequence(gift_ia_item, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_ia_rating = self.parse_sequence(gift_ia_rating, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
+
+
         gift_ia_genre = self.parse_sequence(gift_ia_genre, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_ia_director = self.parse_sequence(gift_ia_director, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_ia_actor = self.parse_sequence(gift_ia_actor, max_length=GIFT_IA_MAX_LENGTH, delimiter=",", default_value="nan")
@@ -164,9 +177,15 @@ class FeatGenerator(object):
         GIFT_ID_MAX_LENGTH = 30
         gift_id_item = self.parse_sequence(gift_id_item, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
         gift_id_rating = self.parse_sequence(gift_id_rating, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
-        gift_id_genre = self.parse_sequence(gift_id_genre, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
-        gift_id_director = self.parse_sequence(gift_id_director, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
-        gift_id_actor = self.parse_sequence(gift_id_actor, max_length=GIFT_ID_MAX_LENGTH, delimiter=",", default_value="nan")
+
+        # multihot
+
+        gift_id_genre = self.parse_sequence(gift_id_genre, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
+                                            default_value="nan")
+        gift_id_director = self.parse_sequence(gift_id_director, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
+                                               default_value="nan")
+        gift_id_actor = self.parse_sequence(gift_id_actor, max_length=GIFT_ID_MAX_LENGTH, delimiter=",",
+                                            default_value="nan")
 
         features = {}
 
@@ -186,7 +205,9 @@ class FeatGenerator(object):
         features["seq_item"] = seq_item
         features["seq_rating"] = seq_rating
         features["seq_genre"] = seq_genre
-        features["length"] = length
+        features["seq_actor"] = seq_actor
+        features["seq_director"] = seq_director
+        features["length"] = tf.string_to_number(length, out_type=tf.int32)
 
         # gift_sequence
         features["gift_ia_item"] = gift_ia_item
@@ -250,21 +271,20 @@ class TensorGenerator(object):
             actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["actor"], sp_weights=None, combiner="mean")
             director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["director"], sp_weights=None, combiner="mean")
 
-            # _embedding = tf.nn.embedding_lookup(_lookup_table,
-            #                                     tf.string_to_hash_bucket_fast(features[""],
-            #                                                                   feat_config["n_"]))
-            #
-            # _embedding = tf.nn.embedding_lookup(_lookup_table,
-            #                                     tf.string_to_hash_bucket_fast(features[""],
-            #                                                                   feat_config["n_"]))
-            # item sequence
-
+            # opt_sequence
             seq_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
                                                         tf.string_to_hash_bucket_fast(features["seq_item"],
                                                                                       feat_config["n_item"]))
             seq_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
                                                        tf.string_to_hash_bucket_fast(features["seq_rating"],
                                                                                      feat_config["n_rating"]))
+            seq_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["seq_genre"],
+                                                                sp_weights=None, combiner="mean")
+            seq_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_actor"],
+                                                                sp_weights=None, combiner="mean")
+            seq_director_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_director"],
+                                                                   sp_weights=None, combiner="mean")
+
             # gift sequence
             # ia
             gift_ia_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
@@ -273,20 +293,32 @@ class TensorGenerator(object):
             gift_ia_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
                                                               tf.string_to_hash_bucket_fast(features["gift_ia_rating"],
                                                                                             feat_config["n_rating"]))
+
+            gift_ia_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["gift_ia_genre"],
+                                                                    sp_weights=None, combiner="mean")
+            gift_ia_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["gift_ia_actor"],
+                                                                    sp_weights=None, combiner="mean")
+            gift_ia_director_embedding = tf.nn.embedding_lookup_sparse(director_look_table,
+                                                                       sp_ids=features["gift_ia_director"],
+                                                                       sp_weights=None, combiner="mean")
+
             # id
             gift_id_item_embedding = tf.nn.embedding_lookup(item_lookup_table,
                                                             tf.string_to_hash_bucket_fast(features["gift_id_item"],
                                                                                           feat_config["n_item"]))
             gift_id_rating_embedding = tf.nn.embedding_lookup(rating_lookup_table,
-                                                            tf.string_to_hash_bucket_fast(features["gift_id_rating"],
-                                                                                          feat_config["n_rating"]))
-            # gift_actor_embedding = tf.nn.embedding_lookup(actor_lookup_table,
-            #                                                tf.string_to_hash_bucket_fast(features["gift_ia_author"],
-            #                                                                              feat_config["n_author"]))
-            #
-            # gift_publisher_embedding = tf.nn.embedding_lookup(publisher_lookup_table,
-            #                                                   tf.string_to_hash_bucket_fast(features["gift_publisher"],
-            #                                                                                 feat_config["n_publisher"]))
+                                                              tf.string_to_hash_bucket_fast(features["gift_id_rating"],
+                                                                                            feat_config["n_rating"]))
+
+            gift_id_genre_embedding = tf.nn.embedding_lookup_sparse(genre_look_table, sp_ids=features["gift_id_genre"],
+                                                                    sp_weights=None, combiner="mean")
+
+            gift_id_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["gift_id_actor"],
+                                                                    sp_weights=None, combiner="mean")
+
+            gift_id_director_embedding = tf.nn.embedding_lookup_sparse(director_look_table, sp_ids=features["gift_id_director"],
+                                                                       sp_weights=None, combiner="mean")
+
 
             # concatenate the tensors
             tensor_dict = {}

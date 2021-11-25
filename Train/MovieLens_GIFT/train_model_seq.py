@@ -2,6 +2,8 @@
 import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
+import sys
+sys.path.append("../..")
 from FeatGeneration.fg_MovieLens import FeatGenerator, TensorGenerator
 from Model.model_seq import ModelSeq
 

@@ -17,4 +17,5 @@
 /FeatGeneration/DBook/ui_sample_gift_new_train.csv
 /FeatGeneration/DBook/ui_sample_gift_new_test.csv
 /FeatGeneration/DBook/ui_sample_gift_full_train.csv
+/Train/MovieLens_GIFT/save_log/*
 /Train/DBook_GIFT/save_log/*

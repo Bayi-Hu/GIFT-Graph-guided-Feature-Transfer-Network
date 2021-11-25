@@ -12,7 +12,7 @@ class ModelSeq(Model):
         self.opt_seq_embedding = tensor_dict["opt_seq_embedding"]
 
         # notice, it should be mask with the length mask ..
-        self.sequence_mask = tf.sequence_mask(self.length, maxlen=100, name="sequence_mask")
+        self.sequence_mask = tf.sequence_mask(self.length, maxlen=50, name="sequence_mask")
         dim = self.opt_seq_embedding.get_shape()[-1]
         mask_2d = tf.tile(tf.expand_dims(self.sequence_mask, axis=2), multiples=[1, 1, dim])
         self.masked_opt_seq_embedding = self.opt_seq_embedding * tf.cast(mask_2d, tf.float32) # convert bool to float

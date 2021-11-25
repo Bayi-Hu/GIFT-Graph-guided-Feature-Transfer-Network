@@ -3,7 +3,7 @@ import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from FeatGeneration.fg_MovieLens import FeatGenerator, TensorGenerator
-from Model.model_seq_target_atten import ModelSeqTargetAtten
+from Model.model_seq import ModelSeq
 
 if __name__ == '__main__':
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # test_fg = FeatGenerator(test_file)
     # test_features = test_fg.feature_generation()
     # test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
-    model = ModelSeqTargetAtten(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
+    model = ModelSeq(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
     model.build()
 
     checkpoint_dir = "./save_log"
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
                 # save model
-                saver.save(sess, os.path.join(checkpoint_dir, "model_seq_ta"+str(iter)))
+                saver.save(sess, os.path.join(checkpoint_dir, "model_seq_"+str(iter)))
                 break
 
 

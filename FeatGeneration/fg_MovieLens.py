@@ -42,7 +42,7 @@ class FeatGenerator(object):
 
             "max_length": 50,
             "batch_size": 128,
-            "epoch": 4
+            "epoch": 1
         }
 
     def parse_split(self, line):
@@ -316,11 +316,11 @@ class TensorGenerator(object):
             seq_actor_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_actor"],
                                                                 sp_weights=None, combiner="mean")
 
-            seq_actor_embedding = tf.reshape(seq_genre_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_actor"]])
+            seq_actor_embedding = tf.reshape(seq_actor_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_actor"]])
 
             seq_director_embedding = tf.nn.embedding_lookup_sparse(actor_look_table, sp_ids=features["seq_director"],
                                                                    sp_weights=None, combiner="mean")
-            seq_director_embedding = tf.reshape(seq_genre_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_director"]])
+            seq_director_embedding = tf.reshape(seq_director_embedding, [-1, SEQ_MAX_LENGTH, feat_config["d_director"]])
 
             # gift sequence
             # ia
@@ -373,6 +373,7 @@ class TensorGenerator(object):
             tensor_dict["user_embedding"] = tf.concat([user_embedding, age_embedding, occupation_embedding, zip_embedding], 1)
             tensor_dict["item_embedding"] = tf.concat([item_embedding, rating_embedding, genre_embedding, actor_embedding, director_embedding], 1)
             tensor_dict["opt_seq_embedding"] = tf.concat([seq_item_embedding, seq_rating_embedding, seq_genre_embedding, seq_actor_embedding, seq_director_embedding], 2)
+            tensor_dict["length"] = features["length"]
 
             # gift feature
             # ia

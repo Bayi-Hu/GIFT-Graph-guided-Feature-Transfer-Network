@@ -7,7 +7,8 @@ from Model.model import Model
 
 if __name__ == '__main__':
 
-    train_file = "../../FeatGeneration/MovieLens-1M/ui_sample_gift_new_test.csv" # tmp test
+    # train_file = "../../FeatGeneration/MovieLens-1M/ui_sample_gift_new_test.csv" # tmp test
+    train_file = "../../FeatGeneration/MovieLens-1M/ui_sample_gift_full_train.csv"
 
     train_fg = FeatGenerator(train_file)
     train_features = train_fg.feature_generation()

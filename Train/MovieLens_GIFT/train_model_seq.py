@@ -37,11 +37,14 @@ if __name__ == '__main__':
                 if iter % 100 == 0:
                     print("iter=%d, loss=%f, acc=%f" %(iter, loss, acc))
 
+                if iter % 7367 == 0 and iter>0:
+                    saver.save(sess, os.path.join(checkpoint_dir, "model_seq_" + str(round(iter / 7367))))
+
                 iter += 1
             except Exception as e:
                 print(e)
                 # save model
-                saver.save(sess, os.path.join(checkpoint_dir, "model_seq_"+str(iter)))
+                # saver.save(sess, os.path.join(checkpoint_dir, "model_seq_"+str(iter)))
                 break
 
 

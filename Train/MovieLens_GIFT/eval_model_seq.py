@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = ModelSeq(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
     model.build()
 
-    ckpt = "./save_log/model_seq_7367"
+    ckpt = "./save_log/model_seq_5"
     saver = tf.train.Saver()
 
     logits = []

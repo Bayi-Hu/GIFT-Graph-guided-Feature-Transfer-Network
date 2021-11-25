@@ -49,15 +49,15 @@ class ModelGIFT(Model):
         """
         # self.gift_attended_embeddings = self.GIFT_layer()
 
-        self.gift_attended_embedding = self.GIFT_layer()
-        inp = tf.concat([self.item_embedding,
-                         self.user_embedding,
-                         self.gift_embedding_sum,
-                         self.gift_attended_embedding], axis=1)
-
+        # self.gift_attended_embedding = self.GIFT_layer()
         # inp = tf.concat([self.item_embedding,
         #                  self.user_embedding,
-        #                  self.gift_embedding_sum], axis=1)
+        #                  self.gift_embedding_sum,
+        #                  self.gift_attended_embedding], axis=1)
+
+        inp = tf.concat([self.item_embedding,
+                         self.user_embedding,
+                         self.gift_embedding_sum], axis=1)
 
         # inp = tf.concat([self.item_embedding,
         #                  self.user_embedding], axis=1)

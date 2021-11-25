@@ -7,19 +7,17 @@ from Model.model_gift import ModelGIFT
 
 if __name__ == '__main__':
 
-    train_file = "../../FeatGeneration/DBook/ui_sample_gift_pretrain.csv"
+    train_file = "../../FeatGeneration/DBook/ui_sample_gift_new_train.csv"
 
     train_fg = FeatGenerator(train_file)
     train_features = train_fg.feature_generation()
     tg = TensorGenerator()
     train_tensor_dict = tg.embedding_layer(train_features, train_fg.feat_config)
 
-    # test_fg = FeatGenerator(test_file)
-    # test_features = test_fg.feature_generation()
-    # test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
     model = ModelGIFT(train_tensor_dict, train_config={"is_training": True, "dropout_rate": 0.2})
     model.build()
 
+    ckpt = "./save_log/model_gift_19729"
     checkpoint_dir = "./save_log"
     saver = tf.train.Saver()
 
@@ -38,5 +36,5 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
                 # save model
-                saver.save(sess, os.path.join(checkpoint_dir, "pretrain_model_gift_"+str(iter)))
+                saver.save(sess, os.path.join(checkpoint_dir, "finetune_model_gift_"+str(iter)))
                 break

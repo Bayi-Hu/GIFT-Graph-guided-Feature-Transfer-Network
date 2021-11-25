@@ -2,24 +2,24 @@
 import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from FeatGeneration.fg_MovieLens import FeatGenerator, TensorGenerator
-from Model.model import Model
+from FeatGeneration.fg_DBook import FeatGenerator, TensorGenerator
+from Model.model_gift import ModelGIFT
 from sklearn import metrics
 import numpy as np
 
 if __name__ == '__main__':
 
-    test_file = "../../FeatGeneration/MovieLens-1M/ui_sample_gift_new_test.csv"
+    test_file = "../../FeatGeneration/DBook/ui_sample_gift_new_test.csv"
 
     test_fg = FeatGenerator(test_file)
     test_features = test_fg.feature_generation()
     tg = TensorGenerator()
     test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
 
-    model = Model(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
+    model = ModelGIFT(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
     model.build()
 
-    ckpt = "./save_log/model_5"
+    ckpt = "./save_log/finetune_model_gift_2254"
     saver = tf.train.Saver()
 
     logits = []
@@ -43,8 +43,6 @@ if __name__ == '__main__':
                 iter += 1
             except Exception as e:
                 print(e)
-                # save model
-                # saver.save(sess, os.path.join(checkpoint_dir, "model_"+str(iter)))
                 break
 
     print("pause")

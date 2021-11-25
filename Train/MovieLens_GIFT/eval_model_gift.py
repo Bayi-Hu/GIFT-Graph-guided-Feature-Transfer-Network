@@ -3,7 +3,7 @@ import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from FeatGeneration.fg_MovieLens import FeatGenerator, TensorGenerator
-from Model.model import Model
+from Model.model_gift_ML import ModelGIFT
 from sklearn import metrics
 import numpy as np
 
@@ -16,10 +16,10 @@ if __name__ == '__main__':
     tg = TensorGenerator()
     test_tensor_dict = tg.embedding_layer(test_features, test_fg.feat_config)
 
-    model = Model(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
+    model = ModelGIFT(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
     model.build()
 
-    ckpt = "./save_log/model_5"
+    ckpt = "./save_log/model_gift_5"
     saver = tf.train.Saver()
 
     logits = []

@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+import tensorflow as tf
 from Utils.utils import *
 
 class Model(object):

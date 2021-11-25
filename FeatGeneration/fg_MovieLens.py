@@ -1,5 +1,6 @@
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+import tensorflow as tf
 
 SEQ_MAX_LENGTH = 50
 GIFT_IA_MAX_LENGTH = 30

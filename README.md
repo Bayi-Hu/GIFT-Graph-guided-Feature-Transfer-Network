@@ -1,6 +1,6 @@
 # GIFT-Graph-guided-Feature-Transfer-Network
 
-Source code for paper "[GIFT: Graph-guided Feature Transfer Network in Taobao](https://xxx.pdf)"
+Source code for paper "[GIFT: Graph-guIded Feature Transfer for Cold-Start Video Click-Through Rate Prediction](https://arxiv.org/abs/2202.11525)"
 
 # Description
 

@@ -59,8 +59,5 @@ class ModelGIFT(Model):
                          self.user_embedding,
                          self.gift_embedding_sum], axis=1)
 
-        # inp = tf.concat([self.item_embedding,
-        #                  self.user_embedding], axis=1)
-
         self.build_fcn_net(inp)
         self.loss_op()

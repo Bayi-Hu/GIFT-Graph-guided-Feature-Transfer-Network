@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = ModelGIFT(test_tensor_dict, train_config={"is_training": False, "dropout_rate": 0})
     model.build()
 
-    ckpt = "./save_log/model_gift_19729"
+    ckpt = "./save_log/model_gift_index"
     saver = tf.train.Saver()
 
     logits = []

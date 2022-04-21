@@ -37,7 +37,7 @@ We report the results on a large scale video recommendation dataset collected fr
 
 ### Download dataset and preprocess 
 
-* Step 1: Download the amazon product dataset of electronics category, which has 498,196 products and 7,824,482 records, and extract it to `raw_data/` folder.
+<!-- * Step 1: Download the amazon product dataset of electronics category, which has 498,196 products and 7,824,482 records, and extract it to `raw_data/` folder.
 ```sh
 mkdir raw_data/;
 cd utils;
@@ -47,7 +47,7 @@ bash 0_download_raw.sh;
 ```sh
 python 1_convert_pd.py;
 python 2_remap_id.py
-```
+``` -->
 
 ### Training and Evaluation
 

@@ -51,7 +51,7 @@ python 2_remap_id.py
 
 ### Training and Evaluation
 
-This implementation not only contains the GIFT method, but also provides some competitors' method, including DNN, DIN. The training procedures of all method is as follows:
+This implementation not only contains the GIFT method, but also provides other competitors' methods, including DNN and DIN. The training procedures of all method is as follows:
 
 
 

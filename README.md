@@ -1,5 +1,7 @@
 # GIFT-Graph-guided-Feature-Transfer-Network
 
+<div align=center><img width="550" height="350" src="https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/main/materials/GIFT.png"/></div>
+
 ### Introduction
 
 This is the source code for the paper "[GIFT: Graph-guIded Feature Transfer for Cold-Start Video Click-Through Rate Prediction](https://arxiv.org/abs/2202.11525)"
@@ -15,7 +17,6 @@ We report the results on a large scale video recommendation dataset collected fr
 | DIN  |0.7568 | 
 | GIFT |0.7670|
 | GIFT with finetune |0.7693|
-
 
 
 **Bibtex:**

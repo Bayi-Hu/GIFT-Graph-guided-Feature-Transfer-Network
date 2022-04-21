@@ -78,4 +78,3 @@ ui_sample_gift_full_train = ui_sample_gift.loc[list(train_index)]
 # shuffle
 ui_sample_gift_full_train = ui_sample_gift_full_train.sample(frac=1)
 ui_sample_gift_full_train.to_csv(input_dir+"ui_sample_gift_full_train.csv", sep="\t", header=0, index=0, na_rep="")
-

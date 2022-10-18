@@ -7,12 +7,12 @@ This is the source code for the CIKM 22 paper "[GIFT: Graph-guIded Feature Trans
 
 ### Graph Construction for Video Feature Transfer
 ####  Physical Linkage
-![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/main/materials/physical_linkages.png)
+![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/materials/physical_linkages.png)
 #### Semantic Linkage
-![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/main/materials/semantic_linkage.png)
+![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/materials/semantic_linkage.png)
 
 ### Graph-guIded Feature Transfer (GIFT) network
-![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/main/materials/GIFT.png)
+![image text](https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/materials/GIFT.png)
 
 ## Results
 

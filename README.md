@@ -27,7 +27,7 @@ We report the results on a large scale video recommendation dataset collected fr
 | GIFT with finetune |0.7693|
 
 ---
-Due to Alibaba Group's privacy policy, we cannot publish the source dataset used in our paper, but we re-implement the GIFT network and conduct experiments on the DBook dataset, which is collected from www.douban.com.
+Due to Alibaba Group's privacy policy, we cannot publish the source dataset used in the paper, but we re-implement the GIFT network and conduct experiments on the DBook dataset, which is collected from www.douban.com.
 
 ## Getting Start
 

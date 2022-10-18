@@ -78,7 +78,7 @@ python eval_dnn_gift.py;
 **Slides**
 
 Here is our slides:
-https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/GIFT_CIKM22_slides.pdf
+https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/materials/GIFT_CIKM22_slides.pdf
 
 **Bibtex:**
 ```

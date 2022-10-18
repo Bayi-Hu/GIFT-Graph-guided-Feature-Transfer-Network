@@ -38,7 +38,6 @@ Due to Alibaba Group's privacy policy, we cannot publish the source dataset used
 
 ### Preprocess dataset 
 
-
 * Step 1: Construct physical linkages between new books and old books.
 ```sh
 cd FeatGeneration;
@@ -75,6 +74,11 @@ python eval_dnn_gift.py;
 
 ---
 ## Citation
+
+**Slides**
+
+Here is our slides:
+https://github.com/Bayi-Hu/GIFT-Graph-guided-Feature-Transfer-Network/blob/master/GIFT_CIKM22_slides.pdf
 
 **Bibtex:**
 ```

@@ -52,15 +52,15 @@ sh process_dbook.sh;
 * Step 2: Train a GIFT (based on DNN) model
 ```sh
 cd Train;
-python train_dnn.py;
-python eval_dnn.py
+python train_dnn_gift.py;
+python eval_dnn_gift.py;
 ``` 
 
 * Step 3: Train and evaluate a DNN model
 ```sh
 cd Train;
-python train_dnn_gift.py;
-python eval_dnn_gift.py;
+python train_dnn.py;
+python eval_dnn.py
 ``` 
 
 ### Results
